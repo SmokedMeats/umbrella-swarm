@@ -1,7 +1,5 @@
 # umbrella-swarm
 
-> **Public snapshot.** [github.com/SmokedMeats/umbrella-swarm](https://github.com/SmokedMeats/umbrella-swarm) is rebuilt from a private repo where day-to-day work happens. Each publish is one fresh commit of the current tree. Private history is never pushed here, so this repo's history is a series of snapshots, not the real commit log.
-
 > **Status: draft.** "Draft" means the multi-agent swarm *workflow* is experimental: the skills can be read and installed, but the way of working they describe is still being tried out. It is not a finished replacement for solo `/umbrella`.
 
 ## What it is
