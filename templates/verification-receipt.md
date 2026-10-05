@@ -23,10 +23,10 @@ AC (layer 4)
 RUNGS
   R0 static        PASS · `project.yml` `commands.pr_ready` → "pr-ready PASS … <tip sha>"
                    check:governance: PASS | N/A (no governed files)
-  R1 seam tests    PASS · <test files> · <n> tests
+  R1 seam tests    PASS · <test files> · <n> tests · harness: <the Rule card harness summary line> | none (card names no harness)
   R2 integration   PASS | N/A (<reason>) · test DB: <name/branch, never production>
   R3 web smoke     PASS | N/A (<reason, e.g. native GPS only / CLI not built yet>) · flows: <names> · screenshots: <links>
-  R4 review        build-verifier VERDICT pass · /code-review in-scope findings: 0 · blast-radius fact: <one line + command>
+  R4 review        build-verifier VERDICT pass · /code-review round <1|2> · in-scope findings: 0 · blast-radius fact: <one line + command>
   R5 fuzz          PASS | N/A · fan-out <0|1|3> · regressions found/fixed: <n>
   R6 emulator      N/A | PASS · <maestro flows>
   R7 real phone    not per PR · phone-visible: yes/no · if yes → ticket stays open on Desk device after merge

@@ -39,6 +39,8 @@ House <slug>: <one user-visible outcome>; done when <check with real numbers>. W
 - **The check is something you can run:** a backend test, a contract case, a web
   smoke flow, or the numbers a Desk device crawl reports. "Code is merged" is not a
   done-check.
+- **One set of numbers.** When the house's spec has a **Rule card** (v1 `/to-spec`),
+  the done-check uses the card's bar and harness. Do not write a second set of numbers.
 - **Why names one milestone goal.** One house = one milestone = one area. A house
   that spans two milestones, or two areas, goes to Board first.
 - A milestone with no house label is worked as one house. Its milestone line is
