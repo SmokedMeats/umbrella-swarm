@@ -116,6 +116,7 @@ each cycle.
 
 Repeat these to every coordinator packet:
 
+- Every agent brief starts with the same opening block: standing rules, then the rule card; the changing part (ticket, files, findings) goes last so briefs within the hour share a cached prefix.
 - Every product issue has a milestone and is on the configured Project board with a Status.
 - Triage stays on Board (`/triage`). Board also enforces the milestone goal line, the house goal line and the ticket `So that:` line.
 - Merge does not mark Done. The lane after merge is Desk device, Field, Operator, or Done (`/implement` **End of house** table).

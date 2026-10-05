@@ -150,6 +150,7 @@ FORBIDDEN     leased files you don't hold; migrations without the parent's go;
 A ticket with sub-issues stays one agent unless the sub-issues touch disjoint files.
 Fresh child by default. Respawn a child once if its receipt misses a required
 field. A second miss is a gap.
+Brief opening order: standing rules, then the rule card; ticket / files / findings last so briefs within the hour share a cached prefix.
 
 ### 5. Review each returned PR
 
@@ -214,7 +215,7 @@ NEXT       first thing next cycle
 
 ## Standing rules you keep
 
-Milestone + Project Status on every issue · Board owns triage (and the goal lines) · merge ≠ Done;
+Brief opening order: standing rules, then the rule card; changing part last (cached prefix) · Milestone + Project Status on every issue · Board owns triage (and the goal lines) · merge ≠ Done;
 lanes per `/implement` · phone-visible stays open on Desk device ·
 `commands.pr_ready_pass` line naming the current tip on every PR (local script, no paid
 Actions) · Dispatch before/after-merge pings · grills are Context / Choices /

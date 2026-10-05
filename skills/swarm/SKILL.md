@@ -85,6 +85,8 @@ FORBIDDEN     umbrella/SKILL.md; running a grill with the founder; merge outside
 STANDING      the standing rules list in /swarm-mode
 ```
 
+**Brief opening order.** Standing rules, then the rule card; the changing part (ticket, files, findings) last so briefs within the hour share a cached prefix (same rule as `/swarm-mode` **Standing rules**).
+
 Where a coordinator runs is a hosting choice: a Cursor Project (cloud coordinator
 with its own computer), or a durable Grok bot lane. Both read the same brief.
 
