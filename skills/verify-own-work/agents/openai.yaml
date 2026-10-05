@@ -1,0 +1,5 @@
+interface:
+  display_name: "Verify Own Work"
+  short_description: "Verification ladder R0-R7 and PR receipt"
+policy:
+  allow_implicit_invocation: true

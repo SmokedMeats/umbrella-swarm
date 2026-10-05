@@ -1,0 +1,5 @@
+interface:
+  display_name: "Area Coordinator"
+  short_description: "One cycle of a goal-owning coordinator; delegates, never codes"
+policy:
+  allow_implicit_invocation: false

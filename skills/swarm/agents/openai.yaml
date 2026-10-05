@@ -1,0 +1,5 @@
+interface:
+  display_name: "Swarm"
+  short_description: "Start, resume, pause, route, and merge for area coordinators"
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,65 @@
+# areas.example.yml — copy to areas.yml in your private overlay (or docs/swarm/).
+# Public umbrella-swarm ships no product areas. See README "Project config".
+
+version: 2
+repo: <org>/<primary-repo>
+base_branch: <dev-branch>          # from project.yml branches.dev
+held_branches: [<held>, <preview>] # from project.yml branches.held
+project: { owner: <org>, number: <N> }
+
+caps:
+  active_coordinators: 5
+  active_coordinators_why: >-
+    Each running coordinator spawns workers that draw on shared rate limits and
+    tokens; each adds landed commits the founder samples next morning;
+    verification trust and collision risk both rise with parallelism.
+  raise_rule: >-
+    +1 slot when, over the last week: verification receipts are trusted, the
+    founder says morning review stays light, no rate-limit stalls, no rebase
+    conflicts between areas, and revert rate stays low. -1 after a missed-rung
+    revert or repeated rate-limit stalls. Cap hard-max until higher verification
+    rungs exist.
+  rotate_rule: >-
+    Each week, and whenever an Active area hits its done-signal, sits idle, or
+    is blocked on the founder, it moves to Next or Parked and the top-ranked
+    Next area takes the slot (unless usually_touches overlaps an Active hot file).
+  coding_subagents_per_area: 2
+
+first_wave: [example-quality]   # proposed Active set at swarm Start
+
+hot_files: []    # paths that need cross-area leases
+
+bugs_area: example-quality      # routing step 3: unhoused bug / Device QA Fail
+never_retire: [example-quality] # can be Parked, never Retired
+quality_area: example-quality   # keeps <dev-branch> green: turns repeat corrections into checks, reviews findings buffers
+
+areas:
+  - slug: example-quality
+    name: Quality stays green
+    status: Active                 # Active | Next | Parked | Retired
+    goal: A user can trust that core flows still work after every merge.
+    why: A red <dev-branch> blocks every agent and every ship.
+    done_signal: Flake rate under the agreed threshold for a full week.
+    milestones: []                 # milestone numbers or titles
+    houses: []                     # umbrella:<slug> labels
+    usually_touches:
+      - src/critical/**
+    rank: 1
+
+  - slug: example-growth
+    name: Growth chapter ships
+    status: Next
+    goal: A user can complete the next product chapter end-to-end.
+    why: This chapter is the weekly reason to come back.
+    done_signal: Chapter houses Hit; phone-visible leftovers on Desk device or Field.
+    milestones: []
+    houses: []
+    usually_touches:
+      - src/features/chapter/**
+    rank: 2
+
+# Routing (first match wins):
+#   1. label area:<slug>
+#   2. milestone goal line "Area: <slug>"
+#   3. uncategorized bug / Device QA Fail → bugs_area
+#   4. no milestone → Board assigns one, then step 2

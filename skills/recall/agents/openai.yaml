@@ -1,0 +1,5 @@
+interface:
+  display_name: "Recall"
+  short_description: "Rebuild context from GitHub and transcripts on restart"
+policy:
+  allow_implicit_invocation: true
