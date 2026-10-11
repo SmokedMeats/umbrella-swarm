@@ -34,19 +34,22 @@ Install in this order. Later packs call earlier ones by name.
 | # | Pack | Why it is needed |
 | --- | --- | --- |
 | 1 | [mattpocock/skills](https://github.com/mattpocock/skills) (v1.3.1) | The base skills that do the work: `/grill-me`, `/to-spec`, `/to-tickets`, `/implement`, `/tdd`, … |
+| 1b | [AminBlg/SimpleEnglish](https://github.com/AminBlg/SimpleEnglish) | `/simple-english` for status, ship notes and grill leftovers |
 | 2 | [SmokedMeats/umbrella-skills](https://github.com/SmokedMeats/umbrella-skills) | `/umbrella`, `/triage`, `/code-review`, the verifiers, and the house rules this pack drives |
 | 3 | [SmokedMeats/umbrella-swarm](https://github.com/SmokedMeats/umbrella-swarm) (this repo) | Swarm mode on top of the two above |
 
-`/swarm` **Start** checks that packs 1 and 2 are installed, the same way `/umbrella` does. If either is missing, it stops and tells you what to install.
-Why by name, not copied: there is one copy of each rule. When umbrella-skills changes, the swarm follows without a re-sync of its own.
+`/swarm` **Start** checks that packs 1, 1b and 2 are installed, the same way `/umbrella` does. If one is missing, it stops and tells you what to install.
+
+Why by name, not copied: this pack's skills say "run `/implement`", they don't restate `/implement`'s rules, so there is one copy of each rule and the swarm follows when umbrella-skills changes. That is about the *text of the rules*. Real files still get copied on install: the sync script writes each pack into every agent's skills folder and into your product repos, and the private umbrella-skills clone keeps pinned backups of Matt's pack, SimpleEnglish, and pstack in `vendor/` so an outside repo going away never breaks an install (umbrella-skills README **Where skills live**).
 
 ## Install
 
-The simplest path is to clone this repo **next to** your umbrella-skills clone and run umbrella-skills' sync script. It installs both packs.
+The simplest path is to clone this repo **next to** your umbrella-skills clone and run umbrella-skills' sync script. It installs both packs. From the private umbrella-skills clone it also installs the pinned Matt pack and SimpleEnglish from `vendor/`, so step 1 is only for public clones.
 
 ```bash
-# 1. Matt's pack (once), then run /setup-matt-pocock-skills in each repo
+# 1. Matt's pack + SimpleEnglish (public clones only), then run /setup-matt-pocock-skills in each repo
 npx skills@latest add mattpocock/skills
+npx skills@latest add https://github.com/AminBlg/SimpleEnglish --skill simple-english
 
 # 2 + 3. umbrella-skills and umbrella-swarm as sibling folders
 git clone https://github.com/SmokedMeats/umbrella-skills.git
@@ -55,7 +58,7 @@ cd umbrella-skills
 node scripts/sync-workspace.mjs
 ```
 
-When a sibling `umbrella-swarm` folder exists, `sync-workspace.mjs` copies its `skills/*` into the same skill roots as umbrella-skills (`~/.grok`, `~/.cursor`, `~/.claude`, `~/.agents`, `~/.copilot`, plus `--box` / `--dest` roots). Use `--no-swarm` to skip it. Details: the umbrella-skills README, **Install**.
+When a sibling `umbrella-swarm` folder exists, `sync-workspace.mjs` copies its `skills/*` into the same skill roots as umbrella-skills: `~/.grok`, `~/.cursor`, `~/.claude`, `~/.agents`, `~/.copilot` (VS Code reads the last three), each product repo's `workspace.skill_targets` folders, and `--box` / `--dest` roots. Commit those product-repo folders so cloud agents see them, and re-run sync after a pack changes; never edit the installed copies. Use `--no-swarm` to skip the swarm pack. Details: the umbrella-skills README, **Install**.
 
 Then say `/swarm-mode` (or "start the swarm") in your agent.
 
