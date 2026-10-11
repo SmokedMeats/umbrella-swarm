@@ -14,7 +14,8 @@ Bindings: `project.yml` keys, `<dev-branch>`-style placeholders, `areas.yml`, an
 
 The agent that wrote the change runs the rungs its area lists (`verify_rungs` in
 `areas.yml`), then pastes a receipt in the PR body under `## Verification`. A
-coordinator or verifier agent can re-run any rung. **A missing rung is a gap, not a
+separate verifier agent re-runs the rungs and gives the verdict (**Independent
+verdict**); a coordinator can re-run any rung. **A missing rung is a gap, not a
 pass.** Each rung is PASS, FAIL, or N/A with a reason.
 
 Lauren Tan's rule: give the agent hands and eyes so it can see what it built
@@ -46,24 +47,87 @@ If the R3 CLI or the R2 test database doesn't exist yet, mark the rung
 `N/A: not built yet` and say so in the receipt. Do not count it as a pass for
 self-merge tiers.
 
+## Running the gates
+
+- **One heavy check at a time per container.** Type check, `verify`,
+  `commands.pr_ready` and multi-suite test runs take the shared lock:
+  `flock <caps.heavy_gate_lock> <command>` (Linux). Single-file test runs don't. A
+  single local agent with nothing else in its container may skip the lock.
+  Why: about 5 type checks at once in one 15 GB container drew 7 OOM kills and no
+  PR in an hour (2026-10-11).
+- **Run each gate to the end, in the foreground.** Read its exit code before you
+  report. Never end a turn "waiting for results".
+  Why: a gate still running when the turn ends has no reader; in the 2026-10-11 run
+  no ticket reached a PR in an hour.
+- **Exit 137 or 143 is a kill, not red code.** 137 is SIGKILL (usually out of
+  memory), 143 is SIGTERM. Re-run the gate under the lock. It is never a type error
+  and never a FAIL rung. Killed again under the lock → the rung is not run (a gap),
+  and the report says "killed twice under lock (memory)".
+  Why: a kill says nothing about the code; read as red, it sends the worker to fix
+  code that isn't broken.
+
+## Independent verdict
+
+The author runs the rungs and writes the receipt. The **verdict** comes from a
+different agent, one per ticket, that didn't write it (the coordinator, for a
+fan-out `0` ticket). Green CI or a bot review is
+not a verdict. Verify each ticket on its own; there is no combined check across
+tickets (cross-ticket breakage is caught at merge, `/swarm` **Merge path**).
+Why: pstack `shipping.md`; a writer grading itself passes what it misread.
+
+The verifier records one line in the receipt:
+
+```text
+VERDICT  pass | fail · by <verifier agent> · head <sha> · base <dev-branch sha> · patch-id <id>
+```
+
+`patch-id` is `git diff <base>...<head> | git patch-id --stable` (first field).
+
+### Verdict across a rebase (patch-id rule)
+
+After any rebase (docs last, Dispatch's merge-time rebase, a moved `<dev-branch>`),
+recompute the patch-id on the new head:
+
+- **Unchanged** → the verdict holds. Re-run R0 (`commands.pr_ready` on the new tip),
+  CI and the mergeability check only.
+- **Changed only in docs, tests or lint config** (for example the docs-last commit)
+  → the code verdict holds; R0, CI and mergeability run fresh on the new head.
+- **Changed in code** (a conflict was resolved, code was added) → the verifier
+  re-verifies the rungs the change touches and writes a new VERDICT line.
+
+Never accept a matching commit message or a green check from an older SHA instead.
+
+Why: pstack `autopilot-full.md`; a rebase that didn't change the patch didn't change
+what was verified, and one that did must be looked at again.
+
 ## Fan-out (cost knob)
 
-- `0`: the coding agent verifies itself. Cheapest.
-- `1` (default): one separate verifier agent re-runs R0–R3 and does R5 lightly.
+Scale verification to the ticket (pstack `orchestrate.md` **Verification**):
+
+- `0`: only when the whole check is one cheap command (docs-only, config, a
+  copy change). The worker runs it and reports the output; the coordinator
+  spot-checks the receipt and writes the VERDICT. Still not the author.
+- `1` (default, and the floor for any behavior change): one separate verifier
+  agent re-runs R0–R3, does R5 lightly, and writes the VERDICT.
 - `3`: for risky PRs (grading math, money, shared contracts). Lauren tunes the
   same knob down from 10 to 1 when tokens matter [53:30].
+
+Run the verifier on a different model family from the worker when you can.
+Why: a verifier agent whose whole job is re-running one command is ceremony; one
+that shares the worker's model shares its blind spots (pstack `orchestrate.md`).
 
 ## Fix loop
 
 A FAIL goes back to the same ticket (`/implement` **Build loop**). Fix it, then
-re-run that rung and every rung after it. After Development moves, R0 runs again,
-plus the rungs the diff needs.
+re-run that rung and every rung after it, and the verifier writes a new VERDICT.
+After <dev-branch> moves, apply the patch-id rule: R0 runs again, plus the rungs
+the diff needs.
 
 ## Receipt
 
 Use [verification-receipt.md](../../templates/verification-receipt.md). Paste it
 under `## Verification` in the PR body (umbrella `BUILD-STANDING.md` **PR briefing**).
-Dispatch refuses a PR whose receipt lacks a rung its area lists.
+Dispatch refuses a PR whose receipt lacks a rung its area lists or a VERDICT line.
 
 ## Standing rules kept
 

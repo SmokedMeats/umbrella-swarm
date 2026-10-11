@@ -71,7 +71,9 @@ BRIEF         <brief issue URL>
 BUFFER        <findings buffer issue URL>
 MILESTONES    titles + goal lines (with Why) from GitHub   ← layer 2
 HOUSES        slugs + house goal lines (done-check, Why) from GitHub / areas.yml   ← layer 3, the coordinator's finish lines
-CAPS          coding_subagents_per_area, verifier_fanout, pr_soft_cap_files, cycle
+CAPS          coding_subagents_per_area, coding_subagents_total, verifier_fanout, pr_soft_cap_files, cycle,
+              per_worker_memory_gb, memory_reserve_gb, heavy_gate_lock, sibling_sessions_allowed
+RUNTIME       cursor-cloud | claude-code (worker shapes per **Workers by runtime**)
 MERGE_TIER    0 | 1 | 2   (from the swarm state issue)
 LEASES        held by this area; hot_files list from areas.yml
 SKILL_PATH    skills/area-coordinator/SKILL.md (umbrella-swarm)
@@ -88,7 +90,63 @@ STANDING      the standing rules list in /swarm-mode
 **Brief opening order.** Standing rules, then the rule card; the changing part (ticket, files, findings) last so briefs within the hour share a cached prefix (same rule as `/swarm-mode` **Standing rules**).
 
 Where a coordinator runs is a hosting choice: a Cursor Project (cloud coordinator
-with its own computer), or a durable Grok bot lane. Both read the same brief.
+with its own computer), a Claude Code cloud session, or a durable Grok bot lane. All
+read the same brief. Where its **workers** run decides how many can run safely:
+
+## Workers by runtime
+
+A "worker" is any coding agent a coordinator spawns for one ticket. What it shares
+with the coordinator depends on the runtime:
+
+| Runtime | What a worker is | Isolation | How to scale |
+| --- | --- | --- | --- |
+| Cursor cloud | a cloud agent | own VM | one per ticket; the worker caps are the only limit |
+| Claude Code, in-process subagent (`Agent` tool) | runs inside the coordinator's container | **shared** CPU, memory, disk, `/tmp` | memory check before each spawn; one heavy check at a time (`heavy_gate_lock`) |
+| Claude Code, sibling session (`create_session`, claude-code-remote) | a new cloud session | own container | the way past the memory check |
+
+Why: on 2026-10-11 a garden run put 12 in-process workers in one 15 GB container;
+about 5 type checks ran at once, the OOM killer fired 7 times (exit 137), and no
+ticket reached a PR in an hour. Cursor workers never hit this because each is its
+own VM. The pack had assumed the Cursor shape.
+
+**Detect the runtime from your tools.** A Cursor cloud-agent spawn tool → Cursor
+cloud. The `Agent` tool → Claude Code; `create_session` present and
+`caps.sibling_sessions_allowed: true` → sibling sessions are available too.
+
+**The caps count every worker.** `caps.coding_subagents_per_area` and
+`caps.coding_subagents_total` count coding workers on any runtime: Cursor cloud
+agent, in-process subagent, or sibling session. There is no separate sibling cap.
+In Claude Code the memory check only picks the **shape** of the next worker inside
+those caps:
+
+1. Read available memory: the cgroup limit when one is set
+   (`/sys/fs/cgroup/memory.max` minus `memory.current`), otherwise `MemAvailable`
+   in `/proc/meminfo`.
+2. `available - caps.memory_reserve_gb ≥ caps.per_worker_memory_gb` → spawn
+   in-process.
+3. Otherwise → a sibling session if `sibling_sessions_allowed`, else queue the
+   ticket for the next cycle.
+
+The memory check never applies on Cursor cloud. "Use as many agents as needed"
+from the founder raises the configured caps; it never raises the memory check. Past
+it, workers become sibling sessions or wait.
+Why: the caps are about rate limits, review load and collisions, which don't care
+where a worker runs; memory is about one container, so it only picks the shape.
+
+**Sibling-session contract.** Separate containers share no filesystem, so:
+
+- The brief is the full context packet: standing rules, rule card, ticket, ACs,
+  shared helpers, lock path. Nothing by reference to `/tmp`, a scratchpad, or a
+  file only the coordinator's container has.
+- The worker pushes only its own ticket branch, named in the brief. Never
+  `<dev-branch>`, Preview, master, or another worker's branch. The coordinator
+  fetches that branch to review it.
+- A cloud sibling can't message back. The coordinator schedules a check-in
+  (`send_later`) and reads the result with `get_session` (status) and
+  `list_events` (final report). A `child-session-event` arrives only when a turn
+  fails; a clean finish is silent.
+- Cost: each sibling is a full session. Use them when the batch needs more workers
+  than memory allows, not by default.
 
 ## Resume
 
@@ -213,17 +271,29 @@ The lease table is on the swarm state issue:
 ## Merge path
 
 The coordinator hands a PR to Dispatch only with a complete receipt
-([verify-own-work](../verify-own-work/SKILL.md)). Dispatch:
+([verify-own-work](../verify-own-work/SKILL.md)) whose **VERDICT** comes from an
+agent that didn't write the PR. Green CI or a bot review is not a verdict.
+Why: an author grading its own work misses what it misread (pstack `shipping.md`).
+Dispatch:
 
-1. Checks the `commands.pr_ready_pass` line names the **current** `<dev-branch>` tip.
-2. Checks the receipt has every rung the area lists, or N/A with a reason.
-3. Checks leases and overlaps with other Ready PRs (soft-queue overlap check).
-4. Sends the **before-merge ping**.
-5. **Tier 0:** waits for the founder's approval. **Tier 1/2:** merges only if the PR fits
+1. Checks the receipt has every rung the area lists, or N/A with a reason, and a
+   VERDICT line (verifier, head SHA, base SHA, patch-id).
+2. Checks leases and overlaps with other Ready PRs (soft-queue overlap check).
+3. Sends the **before-merge ping**.
+4. **Tier 0:** waits for the founder's approval. **Tier 1/2:** merges only if the PR fits
    that tier's rules on the swarm state issue. Otherwise waits for the founder.
-6. Merges one PR at a time. After each merge it asks every other Ready PR that
-   shares a path to rebase, re-run `commands.pr_ready`, and re-run the rungs its diff needs.
-7. Sends the **after-merge ping**. The coordinator then sets the lane per `/implement`.
+5. **Lands one PR at a time from the bottom (stack base first, else oldest Ready), each rechecked on the current tip.**
+   Before each merge: rebase the PR onto the current `<dev-branch>` tip, re-run
+   `commands.pr_ready` (the `commands.pr_ready_pass` line must name that tip) and CI
+   on the rebased head, and apply the **patch-id rule**
+   ([verify-own-work](../verify-own-work/SKILL.md) **Verdict across a rebase**):
+   same patch-id → the verdict holds; changed → back to the verifier first.
+   There is no combined pre-merge check of several PRs: cross-ticket breakage shows
+   up here, on the next PR's rebased head.
+   Why: each landed PR changes the trunk the next one runs on; checking each against
+   the real tip catches what a batch check on a guessed tip misses (pstack
+   `autopilot-full.md`).
+6. Sends the **after-merge ping**. The coordinator then sets the lane per `/implement`.
    Merge never marks Done.
 
 **Never self-merge,** at any tier: DB migrations, master/Preview promotes, OTA,

@@ -23,7 +23,26 @@ caps:
     Each week, and whenever an Active area hits its done-signal, sits idle, or
     is blocked on the founder, it moves to Next or Parked and the top-ranked
     Next area takes the slot (unless usually_touches overlaps an Active hot file).
+  # Worker caps count every coding worker on any runtime: Cursor cloud agent,
+  # Claude Code in-process subagent, or Claude Code sibling session.
   coding_subagents_per_area: 2
+  coding_subagents_total: 10    # pstack orchestrate: roughly ten in flight per coordinator, as a rolling window
+  # Claude Code only. In-process workers share the coordinator's container.
+  # Before each in-process spawn: available - memory_reserve_gb >= per_worker_memory_gb,
+  # else the worker is a sibling session (if allowed) or queues. Never applies on
+  # Cursor cloud (own VM per worker). A founder's "as many as needed" raises the
+  # caps above, never this check.
+  # Why: 12 in-process workers in one 15 GB container -> 7 OOM kills (exit 137),
+  # no PR in an hour (2026-10-11).
+  per_worker_memory_gb: 3
+  memory_reserve_gb: 2
+  # Shared lock for heavy gates (type check, verify, pr_ready, multi-suite tests):
+  #   flock <heavy_gate_lock> <command>
+  # Why: ~5 type checks at once in one container drew the OOM kills above.
+  heavy_gate_lock: /tmp/umbrella-swarm-heavy-gate.lock
+  # Claude Code only: may a coordinator spawn workers as sibling cloud sessions
+  # (create_session) once the memory check fails? They count toward the caps above.
+  sibling_sessions_allowed: true
 
 first_wave: [example-quality]   # proposed Active set at swarm Start
 
