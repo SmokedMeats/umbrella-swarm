@@ -151,16 +151,17 @@ branch, one PR into `<dev-branch>`.
 **Pick the worker's shape by runtime** (`/swarm` **Workers by runtime**):
 
 - Cursor cloud → a cloud agent. The caps are the only limit.
-- Claude Code → before **each** in-process spawn, run the memory check
-  (`available - caps.memory_reserve_gb ≥ caps.per_worker_memory_gb`). Passes →
-  in-process subagent. Fails → a sibling session (`create_session`) if
+- Claude Code → before **each** in-process spawn, run v1's memory check
+  (umbrella `DELEGATION.md` **Child shape by runtime**: `available -
+  limits.mem_reserve_gb ≥ limits.child_mem_gb`). Passes → in-process subagent. Fails → a sibling session (`create_session`) if
   `caps.sibling_sessions_allowed`, else queue the ticket for next cycle. A founder's
   "as many as needed" never overrides the memory check.
   Why: in-process workers share one container's memory; the caps don't know that.
-- Sibling session → the brief carries the full packet (nothing by path to your
-  `/tmp` or scratchpad), names the one branch the worker pushes, and you arm a
-  check-in (`send_later`) to read its result with `get_session` / `list_events`.
-  It can't message you back; you hear only if a turn fails.
+- Sibling session → v1 DELEGATION **Sibling contract**: the brief carries the full
+  packet (nothing by path to your `/tmp` or scratchpad), names the one branch the
+  worker pushes, and you arm a check-in (`send_later`) to read its result with
+  `get_session` / `list_events`. It can't message you back; you hear only if a turn
+  fails.
 
 Use the implement-ticket packet from `umbrella/DELEGATION.md` and the `/implement`
 **Child rules**, plus:
@@ -176,24 +177,16 @@ PR_RULES      Mode B solo: this agent owns its branch; push only that branch;
 SHARED_HELPERS  <existing helpers for this kind of change: path · what it does>. Use these.
               Don't add a new shared helper; if you need one, stop and report it.
               Why: six copies of one retry helper, five conflicting (2026-10-11).
-HEAVY_GATES   type check and `commands.verify` run through the slotted gate:
-              `<verify-own-work skill>/scripts/heavy-gate.sh <command>`, env from caps
-              (HEAVY_GATE_LOCK, HEAVY_GATE_SLOTS, HEAVY_GATE_PER_CHECK_GB, HEAVY_GATE_RESERVE_GB).
-              Single-file test runs: no gate.
-              Why: ~5 type checks at once → 7 OOM kills; one lock left 12 GB idle (2026-10-11).
-TESTS         only the test files for what you touched plus direct callers, one file at a
-              time; never a whole-directory or package sweep.
-              Why: one directory-wide jest sweep held the gate 12+ minutes (2026-10-11).
-RUN_TO_END    run every gate in the foreground to its exit code; never end a turn
-              "waiting for results".
-KILLED        exit 137 or 143 is a kill (out of memory), not red code: re-run through the
-              gate; never report it as a type error or a FAIL rung. Killed again → report
-              "killed twice through the gate (memory)"; the rung is not run.
+CHECKS        umbrella/BUILD-STANDING.md (in the child rules): **Heavy checks through the
+              gate** (`heavy <command>`, one gate per container), **Tests: touched files
+              and direct callers**, **Run checks to the end** (137/143 is a re-run).
+              Why: ~5 type checks at once → 7 OOM kills; one directory sweep held the
+              gate 12+ minutes (2026-10-11). One copy of these rules lives in v1.
 SIZE          stay under caps.pr_soft_cap_files; if not, stop and report a split
 DOCS_LAST     do not edit hot docs (areas.yml hot_files); list the doc hits in the report
 VERIFY        run skills/verify-own-work/SKILL.md for rungs <area rungs>; paste the receipt.
-              Your checks: `commands.verify` for each touched package + the TESTS above,
-              on the committed head. Not `commands.pr_ready`: the verifier and Dispatch run it.
+              Your checks: package `verify` for each touched package + the tests CHECKS
+              names, on the committed head. Not `commands.pr_ready`: the verifier and Dispatch run it.
 FORBIDDEN     leased files you don't hold; migrations without the parent's go;
               Project Status; closing issues; triage labels
 ```
@@ -215,21 +208,19 @@ Brief opening order: standing rules, then the rule card; ticket / files / findin
    conflicted on 2026-10-11); found early it is a one-line note.
 1. Receipt complete for your rungs ([verify-own-work](../verify-own-work/SKILL.md)),
    including the AC table (layer 4: every AC checked with proof).
-2. **One independent verifier per ticket**: an agent that didn't write it, running
-   `commands.verify` + `commands.pr_ready` at the verdict SHA and the narrow tests.
-   Its brief names the **review depth** (verify-own-work **Review depth by risk**:
-   full for `locked_areas`, money or grant writes, or when in doubt; low-risk for
-   docs, dead code, comments, a single helper swap). Fan-out per
+2. **One independent verifier per ticket**: `build-verifier` (v1), an agent that
+   didn't write it, running package `verify` + `commands.pr_ready` at the verdict
+   SHA. Its brief names `DEPTH` (`build-verifier` **Depth by risk**: `full` for an
+   area `standing-product-rules.md` locks or a grant, entitlement or money write;
+   `light` otherwise). Fan-out per
    `caps.verifier_fanout` (`0` only for one-command checks, where you
    spot-check the receipt yourself; see verify-own-work **Fan-out**). It gives the
-   verdict and records the VERDICT line (head SHA, base SHA, patch-id). Green CI or
+   verdict and records the VERDICT line (`HEAD_SHA`, `BASE_SHA`, `PATCH_ID`, `DEPTH`). Green CI or
    a bot review is not a verdict. No combined check across tickets; cross-ticket
    breakage is caught at merge (`/swarm` **Merge path**).
    Why: pstack `shipping.md`; the writer can't see what it misread.
-3. The review at that depth passes. Full: `build-verifier` PASS, two-axis
-   `/code-review` with a `/blast-radius` probe has no in-scope findings, 2+
-   red-on-old-code tests. Low-risk: `/code-review` clean, the gates, one
-   red-on-old-code test. Findings go back to the same ticket (`/implement` **Build loop**).
+3. `build-verifier` PASS at that depth, and the ticket's `/code-review` (with
+   `/blast-radius`) has no in-scope findings. Findings go back to the same ticket (`/implement` **Build loop**).
    Use `/pit-of-success` on footgun seams and `/codebase-design` before a new module.
 4. **Docs last:** merge or rebase the current <dev-branch> tip into the PR branch, then add
    the living-doc edits (P* leaf, KNOBS, admin guide, Effect Schema row, module

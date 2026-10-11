@@ -10,6 +10,16 @@ roles:
   cos: Chief of Staff            # parent gate for irreversible steps
   board: Board                   # triage / intake role
   dispatch: Dispatch             # merge-path role
+  device_qa: Mobile QA           # phone Device QA bot lane (DELEGATION, device-qa-verifier)
+
+limits:
+  max_children: 8      # one child cap for both runtimes (Cursor runs 8 agents in parallel); unset → 8
+  child_mem_gb: 3      # Claude Code in-process child needs this much free memory; unset → 3
+  mem_reserve_gb: 2    # kept free for the parent; unset → 2. See DELEGATION "Child shape by runtime"
+  heavy_gate_slots: 3  # max heavy checks at once per container; a new one starts only if 2 GB fits after the reserve at that moment; unset → 3
+
+device_qa:
+  # desk_emulator: emulator-5554  # optional; a Desk crawl may run on this emulator serial (Field / iPhone stay manual). Unset → USB phone only
 
 branches:
   dev: Development               # or main
@@ -18,9 +28,6 @@ branches:
 commands:
   pr_ready: "pnpm run check:pr-ready"       # Mode B gate; paste PASS line in PR body
   pr_ready_pass: "check:pr-ready PASS"      # literal PASS line Dispatch looks for (names the dev tip)
-  verify: "pnpm --filter {pkg} run verify"   # worker's per-package gate ({pkg} = each touched package); no pr_ready
-  push_skip_hook: "HUSKY=0 git push"         # merge-time push after pr_ready passed on this head (hook would re-run it)
-  scheduled_heavy_gate: "npm run preflight:development"  # runs on a schedule over the merged tip, not per ticket
   db_migrate: "cd backend && npm run db:migrate:all"  # when a new migration file is added; carries its own cd
   preflight_master: "npm run preflight:master"        # master bar (runs cycles; verify does not)
   preflight_cycles: "npm run preflight:governance:cycles"
@@ -28,6 +35,7 @@ commands:
   cycles_backend: "cd backend && npm run check-cycles"
   cycles_mobile: "cd <mobile-pkg> && npm run check-cycles"
   governance: "npm run check:governance"
+  # graph_freshness: "node scripts/graph-freshness.mjs"  # optional; exit 0 = local code graph fresh (built at HEAD, ahead, or <24h behind). Unset → skip graphify Orient
 
 paths:
   mobile_src: <mobile-pkg>/src
@@ -35,8 +43,10 @@ paths:
   backend_src: backend/src
   drizzle_glob: backend/drizzle/0xxx_*.sql
   device_qa_checklist: docs/operations/DEVICE_QA_PHASED_CHECKLIST.md
+  # desk_avd_runbook: docs/operations/<desk-emulator-runbook>.md  # optional; boot / kill steps for device_qa.desk_emulator
   effect_schema_inventory: docs/engineering/EFFECT_SCHEMA_TRUST_BOUNDARIES.md
   umbrella_cursor: docs/agents/UMBRELLA_CURSOR.md
+  agent_rules: AGENTS.md            # repo agent-rules / coding standing file; read at start, named in every child packet (unset → AGENTS.md)
   wayfinder_now: docs/trackers/WAYFINDER_NOW.md
   wayfinder_maps: docs/trackers/WAYFINDER_MAPS.md
   house_boards: []                  # house encyclopedia docs living-docs grep should include
@@ -77,4 +87,4 @@ repos:
 workspace:
   overlay_pack: <private-overlay-repo-name>   # sibling clone; sync layers it on top
   skill_targets:
-    - { name: <primary-repo>, dirs: [.cursor/skills] }
+    - { name: <primary-repo>, dirs: [.cursor/skills] }   # add .grok/skills / .claude/skills when your coding agent loads those first

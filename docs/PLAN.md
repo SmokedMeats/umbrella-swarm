@@ -18,6 +18,6 @@ This public pack keeps:
 5. **Verification ladder** — receipt rungs before merge autonomy rises.
 6. **Collisions** — `usually_touches` + hot-file leases.
 7. **Rotation** — when an Active slot frees and who takes it.
-8. **Worker runtime** — where workers run (Cursor cloud VM, Claude Code in-process, Claude Code sibling session), the memory check and slotted heavy-check gate for shared containers.
+8. **Worker runtime** — where workers run (Cursor cloud VM, Claude Code in-process, Claude Code sibling session), the memory check and heavy-check gate for shared containers (both v1 rules in umbrella-skills).
 
 Fill `areas.yml` from `areas.example.yml` in your private overlay. Point skills at it via `project.yml` / `docs/swarm/areas.yml` after sync.

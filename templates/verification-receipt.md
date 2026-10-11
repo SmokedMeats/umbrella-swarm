@@ -22,15 +22,15 @@ AC (layer 4)
   - [ ] <AC text> · PARTIAL | FAIL · what is left
 
 RUNGS
-  R0 static        worker: `commands.verify` PASS · packages: <touched packages>
-                   verifier: `commands.verify` PASS + `commands.pr_ready` → "pr-ready PASS … <tip sha>" at the verdict SHA
+  R0 static        worker: package `verify` PASS · packages: <touched packages>
+                   verifier: package `verify` PASS + `commands.pr_ready` → "pr-ready PASS … <tip sha>" at the verdict SHA
                    merge: base unchanged | base moved → `commands.pr_ready` once on <new head sha>: PASS (hook skipped: yes/no)
                    check:governance: PASS | N/A (no governed files)
   R1 seam tests    PASS · <test files: touched + direct callers, one at a time> · <n> tests · harness: <the Rule card harness summary line> | none (card names no harness)
   R2 integration   PASS | N/A (<reason>) · test DB: <name/branch, never production>
   R3 web smoke     PASS | N/A (<reason, e.g. native GPS only / CLI not built yet>) · flows: <names> · screenshots: <links>
-  R4 review        depth: full | low-risk (why) · full: build-verifier VERDICT pass · /code-review round <1|2> · in-scope findings: 0 · blast-radius probe: <one line + command>
-                   red-on-old-code: <test(s) that fail with the change reverted> (full: 2+, low-risk: 1)
+  R4 review        DEPTH full | light (why) · build-verifier VERDICT pass · /code-review round <1|2> · in-scope findings: 0 · blast-radius probe (full): <one line + command>
+                   red-on-old-code: <test(s) that fail on BASE_SHA, pass on HEAD_SHA> (full: 2+, light: 1)
   R5 fuzz          PASS | N/A · fan-out <0|1|3> · regressions found/fixed: <n>
   R6 emulator      N/A | PASS · <maestro flows>
   R7 real phone    not per PR · phone-visible: yes/no · if yes → ticket stays open on Desk device after merge
@@ -39,9 +39,9 @@ MIGRATION    none | <file> · the founder approved: <link> · applied to test DB
 LEASES       none | <paths held>
 DOCS LAST    living docs written after rebase in <commit sha>: <paths> | none
 OVERLAPS     other Ready PRs sharing paths: <#pr: paths> | none
-KILLS        none | <gate> exit 137/143 → re-run through heavy-gate.sh: PASS | killed again (rung not run)
+KILLS        none | <gate> exit 137/143 → re-run through `heavy`: PASS | killed again (capacity blocker, rung not run)
 
-VERDICT      pass | fail · by <verifier agent, not the author> · head <sha> · base <dev-branch sha> · patch-id <id>
+VERDICT      pass | fail · by <verifier agent, not the author> · head <HEAD_SHA> · base <BASE_SHA> · patch-id <PATCH_ID> · depth full | light
              (after a rebase: same patch-id, or a change only in docs/tests/lint config → holds, R0 + CI re-run; code changed → re-verified, new line)
 ```
 

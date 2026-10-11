@@ -72,8 +72,7 @@ BUFFER        <findings buffer issue URL>
 MILESTONES    titles + goal lines (with Why) from GitHub   ← layer 2
 HOUSES        slugs + house goal lines (done-check, Why) from GitHub / areas.yml   ← layer 3, the coordinator's finish lines
 CAPS          coding_subagents_per_area, coding_subagents_total, verifier_fanout, pr_soft_cap_files, cycle,
-              per_worker_memory_gb, memory_reserve_gb, heavy_gate_lock, heavy_gate_slots,
-              per_check_memory_gb, sibling_sessions_allowed; locked_areas (full review depth)
+              sibling_sessions_allowed (areas.yml); limits.* (project.yml, v1: memory check, heavy gate)
 RUNTIME       cursor-cloud | claude-code (worker shapes per **Workers by runtime**)
 MERGE_TIER    0 | 1 | 2   (from the swarm state issue)
 LEASES        held by this area; hot_files list from areas.yml
@@ -102,7 +101,7 @@ with the coordinator depends on the runtime:
 | Runtime | What a worker is | Isolation | How to scale |
 | --- | --- | --- | --- |
 | Cursor cloud | a cloud agent | own VM | one per ticket; the worker caps are the only limit |
-| Claude Code, in-process subagent (`Agent` tool) | runs inside the coordinator's container | **shared** CPU, memory, disk, `/tmp` | memory check before each spawn; heavy checks through the slotted gate (`heavy_gate_slots`) |
+| Claude Code, in-process subagent (`Agent` tool) | runs inside the coordinator's container | **shared** CPU, memory, disk, `/tmp` | memory check before each spawn; heavy checks through v1's `heavy` gate |
 | Claude Code, sibling session (`create_session`, claude-code-remote) | a new cloud session | own container | the way past the memory check |
 
 Why: on 2026-10-11 a garden run put 12 in-process workers in one 15 GB container;
@@ -117,16 +116,13 @@ cloud. The `Agent` tool → Claude Code; `create_session` present and
 **The caps count every worker.** `caps.coding_subagents_per_area` and
 `caps.coding_subagents_total` count coding workers on any runtime: Cursor cloud
 agent, in-process subagent, or sibling session. There is no separate sibling cap.
-In Claude Code the memory check only picks the **shape** of the next worker inside
-those caps:
-
-1. Read available memory: the cgroup limit when one is set
-   (`/sys/fs/cgroup/memory.max` minus `memory.current`), otherwise `MemAvailable`
-   in `/proc/meminfo`.
-2. `available - caps.memory_reserve_gb ≥ caps.per_worker_memory_gb` → spawn
-   in-process.
-3. Otherwise → a sibling session if `sibling_sessions_allowed`, else queue the
-   ticket for the next cycle.
+A coordinator that runs `/implement` as conductor is also bound by v1's
+`limits.max_children`. In Claude Code the memory check only picks the **shape** of
+the next worker inside those caps. The check is v1's: umbrella `DELEGATION.md`
+**Child shape by runtime** (available = the smaller of `MemAvailable` and the cgroup
+headroom; in-process only while `available - limits.mem_reserve_gb ≥
+limits.child_mem_gb`). Fails → a sibling session if `sibling_sessions_allowed`,
+else queue the ticket for the next cycle.
 
 The memory check never applies on Cursor cloud. "Use as many agents as needed"
 from the founder raises the configured caps; it never raises the memory check. Past
@@ -134,10 +130,11 @@ it, workers become sibling sessions or wait.
 Why: the caps are about rate limits, review load and collisions, which don't care
 where a worker runs; memory is about one container, so it only picks the shape.
 
-**Sibling-session contract.** Separate containers share no filesystem, so:
+**Sibling-session contract** (v1 DELEGATION **Sibling contract**, summarized).
+Separate containers share no filesystem, so:
 
 - The brief is the full context packet: standing rules, rule card, ticket, ACs,
-  shared helpers, lock path. Nothing by reference to `/tmp`, a scratchpad, or a
+  shared helpers. Nothing by reference to `/tmp`, a scratchpad, or a
   file only the coordinator's container has.
 - The worker pushes only its own ticket branch, named in the brief. Never
   `<dev-branch>`, Preview, master, or another worker's branch. The coordinator
@@ -287,15 +284,15 @@ Dispatch:
    Before each merge, if `<dev-branch>` moved since the verdict: merge or rebase it
    into the PR, run `commands.pr_ready` **once** on the new head (the
    `commands.pr_ready_pass` line must name that tip; it is the CI for `<dev-branch>`
-   PRs), and push with `commands.push_skip_hook` when the pre-push hook would re-run
-   that same check. Then the **patch-id rule**
-   ([verify-own-work](../verify-own-work/SKILL.md) **Verdict across a rebase**):
+   PRs), and push with the pre-push hook off (`HUSKY=0`; it would re-run that same
+   check). Then the **patch-id rule** (v1 DELEGATION **Recheck at merge**;
+   [verify-own-work](../verify-own-work/SKILL.md) **Verdict across a rebase**):
    same patch-id, or a change only in docs/tests/lint config → the verdict holds;
    code changed → back to the verifier first. Base unchanged → the verifier's
    `pr_ready` run stands. Budget: verify-own-work **Check budget per ticket**.
    There is no combined pre-merge check of several PRs: cross-ticket breakage shows
-   up here, on the next PR's updated head, and the consuming repo's scheduled heavy
-   gate (`commands.scheduled_heavy_gate`) covers the merged tip.
+   up here, on the next PR's updated head, and the consuming repo's own scheduled
+   heavy check covers the merged tip.
    Why: each landed PR changes the trunk the next one runs on; checking each against
    the real tip catches what a batch check on a guessed tip misses (pstack
    `autopilot-full.md`).
