@@ -36,10 +36,16 @@ caps:
   # no PR in an hour (2026-10-11).
   per_worker_memory_gb: 3
   memory_reserve_gb: 2
-  # Shared lock for heavy gates (type check, verify, pr_ready, multi-suite tests):
-  #   flock <heavy_gate_lock> <command>
-  # Why: ~5 type checks at once in one container drew the OOM kills above.
+  # Slotted gate for heavy checks (type check, verify, pr_ready):
+  #   verify-own-work/scripts/heavy-gate.sh <command>
+  # Slots N = floor((available - memory_reserve_gb) / per_check_memory_gb),
+  # capped at heavy_gate_slots. heavy_gate_lock is the slot file prefix
+  # (<prefix>.1 .. <prefix>.N).
+  # Why: ~5 type checks at once drew the OOM kills above; a single lock then left
+  # 12 GB idle while one check ran and five waited.
   heavy_gate_lock: /tmp/umbrella-swarm-heavy-gate.lock
+  heavy_gate_slots: 3
+  per_check_memory_gb: 2
   # Claude Code only: may a coordinator spawn workers as sibling cloud sessions
   # (create_session) once the memory check fails? They count toward the caps above.
   sibling_sessions_allowed: true
@@ -47,6 +53,7 @@ caps:
 first_wave: [example-quality]   # proposed Active set at swarm Start
 
 hot_files: []    # paths that need cross-area leases
+locked_areas: [] # paths that always get full review depth (verify-own-work "Review depth by risk"); money/grant writes always do
 
 bugs_area: example-quality      # routing step 3: unhoused bug / Device QA Fail
 never_retire: [example-quality] # can be Parked, never Retired

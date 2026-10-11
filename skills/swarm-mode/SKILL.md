@@ -57,7 +57,7 @@ It runs the [/swarm](../swarm/SKILL.md) recipe and keeps area coordinators going
     | Runtime | Worker | Isolation | Scale by |
     | --- | --- | --- | --- |
     | Cursor cloud | cloud agent | own VM | the worker caps only |
-    | Claude Code, in-process (`Agent`) | subagent in the coordinator's container | shared CPU, memory, disk, `/tmp` | memory check + one heavy check at a time |
+    | Claude Code, in-process (`Agent`) | subagent in the coordinator's container | shared CPU, memory, disk, `/tmp` | memory check + slotted heavy-check gate |
     | Claude Code, sibling session (`create_session`) | new cloud session | own container | past the memory check; pushes its own branch, read back on a check-in |
 
     `coding_subagents_per_area` / `coding_subagents_total` count every worker on any

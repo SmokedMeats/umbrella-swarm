@@ -72,7 +72,8 @@ BUFFER        <findings buffer issue URL>
 MILESTONES    titles + goal lines (with Why) from GitHub   ← layer 2
 HOUSES        slugs + house goal lines (done-check, Why) from GitHub / areas.yml   ← layer 3, the coordinator's finish lines
 CAPS          coding_subagents_per_area, coding_subagents_total, verifier_fanout, pr_soft_cap_files, cycle,
-              per_worker_memory_gb, memory_reserve_gb, heavy_gate_lock, sibling_sessions_allowed
+              per_worker_memory_gb, memory_reserve_gb, heavy_gate_lock, heavy_gate_slots,
+              per_check_memory_gb, sibling_sessions_allowed; locked_areas (full review depth)
 RUNTIME       cursor-cloud | claude-code (worker shapes per **Workers by runtime**)
 MERGE_TIER    0 | 1 | 2   (from the swarm state issue)
 LEASES        held by this area; hot_files list from areas.yml
@@ -101,7 +102,7 @@ with the coordinator depends on the runtime:
 | Runtime | What a worker is | Isolation | How to scale |
 | --- | --- | --- | --- |
 | Cursor cloud | a cloud agent | own VM | one per ticket; the worker caps are the only limit |
-| Claude Code, in-process subagent (`Agent` tool) | runs inside the coordinator's container | **shared** CPU, memory, disk, `/tmp` | memory check before each spawn; one heavy check at a time (`heavy_gate_lock`) |
+| Claude Code, in-process subagent (`Agent` tool) | runs inside the coordinator's container | **shared** CPU, memory, disk, `/tmp` | memory check before each spawn; heavy checks through the slotted gate (`heavy_gate_slots`) |
 | Claude Code, sibling session (`create_session`, claude-code-remote) | a new cloud session | own container | the way past the memory check |
 
 Why: on 2026-10-11 a garden run put 12 in-process workers in one 15 GB container;

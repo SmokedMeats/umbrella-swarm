@@ -35,10 +35,10 @@ closed (`build-verifier` rule).
 | Rung | Run | PASS means |
 | --- | --- | --- |
 | **R0 static** | Who runs what is the **Check budget** below. Worker: `project.yml` `commands.verify` for each touched package. Verifier: `commands.verify` + `commands.pr_ready` at the verdict SHA. Add `commands.governance` when governed files changed. | Worker: `verify` green. Verifier: the `commands.pr_ready_pass` line names the **current** <dev-branch> tip. Local scripts; no paid GitHub Actions. |
-| **R1 seam tests** | The changed seam's colocated test (create one if missing, per `/implement`), then the touched package's tests, then the harness the spec's **Rule card** names (v1 `/to-spec`). | Green. No mock of the module under test. No tautological test. The harness reports no new failing row and meets the card's bar; its summary line is in the receipt. |
+| **R1 seam tests** | The changed seam's colocated test (create one if missing, per `/implement`), then the test files of direct callers, one file at a time (**Narrow test scope**; no package or directory sweep), then the harness the spec's **Rule card** names (v1 `/to-spec`). | Green. No mock of the module under test. No tautological test. The harness reports no new failing row and meets the card's bar; its summary line is in the receipt. |
 | **R2 backend integration** | `pnpm --dir backend test:integration` and the relevant `*.postgresOnly.test.ts` against a throwaway test database (for example an ephemeral database branch). Never production. | Green on a database built from current migrations. |
 | **R3 web smoke** | Expo web build (`<mobile-pkg>`, `web` script) + Playwright smoke flows through the shared verification CLI. Do not write a one-off script; extend the CLI. | Flows for the touched screens pass; screenshots attached. Native-only paths (GPS, BLE, HealthKit, Health Connect, watch) → N/A with the reason. |
-| **R4 review** | `build-verifier` (readonly) and `/code-review` two-axis with `/blast-radius`, against the spec's **Rule card**. At most two review rounds (v1 `/implement` **Build loop**); a hard finding after round 2 goes to the parent as a grill question in ESCALATE. | VERDICT pass; no in-scope findings left. |
+| **R4 review** | At the depth the verifier brief names (**Review depth by risk**), against the spec's **Rule card**. At most two review rounds (v1 `/implement` **Build loop**); a hard finding after round 2 goes to the parent as a grill question in ESCALATE. | VERDICT pass; no in-scope findings left. |
 | **R5 fuzz** | `caps.verifier_fanout` verifier agents click around the web build like a user, looking for regressions outside the ticket. | No new regression, or each one fixed in this PR. |
 | **R6 emulator** | Optional, later: cloud Android emulator + Maestro, reusing `.maestro` flows. | Flows pass. |
 | **R7 real phone** | Not per PR. Mobile QA Engineer's sampled Desk device crawl, then `device-qa-verifier`. | Per `device-qa-verifier`. Phone-visible tickets stay open on Desk device until then. |
@@ -49,22 +49,50 @@ self-merge tiers.
 
 ## Running the gates
 
-- **One heavy check at a time per container.** Type check, `verify`,
-  `commands.pr_ready` and multi-suite test runs take the shared lock:
-  `flock <caps.heavy_gate_lock> <command>` (Linux). Single-file test runs don't. A
-  single local agent with nothing else in its container may skip the lock.
-  Why: about 5 type checks at once in one 15 GB container drew 7 OOM kills and no
-  PR in an hour (2026-10-11).
+- **Heavy checks go through the slotted gate.** Type check, `commands.verify` and
+  `commands.pr_ready` run as `scripts/heavy-gate.sh <command>` (in this skill's
+  folder; Linux, `flock`). The gate has N slots:
+  `N = floor((available memory - caps.memory_reserve_gb) / caps.per_check_memory_gb)`,
+  capped at `caps.heavy_gate_slots` (default 3). It tries `flock -n -E 200` on
+  slots 1..N and runs on the first free one; none free → sleep 3 s and retry.
+  Memory is read at each try, so running checks count against it; with no room
+  only slot 1 is open. The command's exit code comes back unchanged (flock's 200
+  never leaks). Single-file test runs don't use the gate. A single local agent with
+  nothing else in its container may skip it. Set the gate's env from `caps`:
+  `HEAVY_GATE_LOCK`, `HEAVY_GATE_SLOTS`, `HEAVY_GATE_PER_CHECK_GB`,
+  `HEAVY_GATE_RESERVE_GB`.
+  Why: about 5 type checks at once in one 15 GB container drew 7 OOM kills
+  (2026-10-11); a single lock then left 12 GB idle while one check ran and five
+  waited.
+- **Narrow test scope.** Workers and verifiers run only the test files for what the
+  ticket touched plus their direct callers, one file at a time. Never a
+  whole-directory or whole-package sweep. The scheduled heavy gate
+  (`commands.scheduled_heavy_gate`) covers the rest.
+  Why: one directory-wide `jest` sweep held the gate for 12+ minutes (2026-10-11).
 - **Run each gate to the end, in the foreground.** Read its exit code before you
   report. Never end a turn "waiting for results".
   Why: a gate still running when the turn ends has no reader; in the 2026-10-11 run
   no ticket reached a PR in an hour.
 - **Exit 137 or 143 is a kill, not red code.** 137 is SIGKILL (usually out of
-  memory), 143 is SIGTERM. Re-run the gate under the lock. It is never a type error
-  and never a FAIL rung. Killed again under the lock → the rung is not run (a gap),
-  and the report says "killed twice under lock (memory)".
+  memory), 143 is SIGTERM. Re-run it through the gate. It is never a type error
+  and never a FAIL rung. Killed again through the gate → the rung is not run (a gap),
+  and the report says "killed twice through the gate (memory)".
   Why: a kill says nothing about the code; read as red, it sends the worker to fix
   code that isn't broken.
+
+## Review depth by risk
+
+The verifier brief names the depth. When in doubt, full.
+
+| Depth | For | Review |
+| --- | --- | --- |
+| **Full** | Paths in `areas.yml` `locked_areas`, money or grant writes, and anything not clearly low-risk | two-axis `/code-review`, `build-verifier`, `/blast-radius` with a probe (a command that shows the reach), red-on-old-code for 2+ tests |
+| **Low-risk** | Docs, dead-code removal, comment-only, a single helper swap | `/code-review` + the gates + one red-on-old-code test |
+
+Red-on-old-code: the test fails with the change reverted and passes with it, so
+it proves the change, not just the code.
+Why: full review on a docs ticket spends a verifier's budget on nothing; the
+risky paths are the ones that get it (2026-10-11).
 
 ## Check budget per ticket
 
@@ -73,7 +101,7 @@ with one owner (pstack `shipping.md` / `autopilot-full.md`):
 
 | Step | Runs | Not |
 | --- | --- | --- |
-| **Worker** | `commands.verify` for each touched package, plus its own tests, on the committed head | `commands.pr_ready`: that is the merge-time gate |
+| **Worker** | `commands.verify` for each touched package, plus the narrow tests (touched files + direct callers), on the committed head | `commands.pr_ready`: that is the merge-time gate |
 | **Verifier** | `commands.verify` + `commands.pr_ready` at the verdict SHA, independent of the writer; records head SHA, base SHA, patch-id | |
 | **Merge** (Dispatch) | Base unchanged since the verdict → nothing new. Base moved → merge or rebase `<dev-branch>` in, run `commands.pr_ready` **once** on the new head (it is the CI for `<dev-branch>` PRs), then push with `commands.push_skip_hook` when the pre-push hook would re-run that identical check. Patch changed in code → back to the verifier (patch-id rule) | a second `pr_ready` from the hook |
 | **Batch** | Nothing per ticket or per merge. The consuming repo's scheduled heavy gate (`commands.scheduled_heavy_gate`) covers the merged tip; a red run goes to the `quality_area` coordinator | a combined check before merge |
