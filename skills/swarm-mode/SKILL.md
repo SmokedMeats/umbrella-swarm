@@ -52,6 +52,23 @@ It runs the [/swarm](../swarm/SKILL.md) recipe and keeps area coordinators going
    when its done-check passes. Board enforces this at triage. See `/swarm`
    **When to create and retire**.
    Why: an item without a done-check can't be finished, verified or retired.
+10. **Worker shape follows the runtime.** Full rules: `/swarm` **Workers by runtime**.
+
+    | Runtime | Worker | Isolation | Scale by |
+    | --- | --- | --- | --- |
+    | Cursor cloud | cloud agent | own VM | the worker caps only |
+    | Claude Code, in-process (`Agent`) | subagent in the coordinator's container | shared CPU, memory, disk, `/tmp` | memory check + one heavy check at a time |
+    | Claude Code, sibling session (`create_session`) | new cloud session | own container | past the memory check; pushes its own branch, read back on a check-in |
+
+    `coding_subagents_per_area` / `coding_subagents_total` count every worker on any
+    runtime. In Claude Code the memory check picks in-process or sibling inside those
+    caps; it never applies on Cursor.
+    Why: 12 in-process workers in one 15 GB container hit 7 OOM kills and shipped no
+    PR in an hour (2026-10-11); Cursor workers each have their own VM.
+11. **Each ticket is verified by an agent that didn't write it, and rechecked at
+    merge** on the current `<dev-branch>` tip (`/swarm` **Merge path**).
+    Why: pstack `shipping.md`; self-grading and batch checks on a stale tip let
+    cross-ticket breakage through.
 
 ## Prerequisites: v1 installed alongside
 
@@ -109,6 +126,7 @@ each cycle.
 | "work on <house>" for a house in a Next or Parked area | `/umbrella` (classic, v1), parent stays Chief of Staff |
 | "rotate" / "activate <area>" / "park <area>" | `/swarm` **Rotate** |
 | "raise the cap" / "lower the cap" | Check `raise_rule` in `areas.yml`, report the numbers, change it only if the founder confirms |
+| "use as many agents as needed" | Raise the worker caps for this batch. Never the memory check: past it, Claude Code workers become sibling sessions or queue |
 | "opt <area> into Tier 1" | Write it on the swarm state issue. Dispatch enforces it. |
 | "make <milestone> part of <area>" | Update the milestone's `Area:` line and areas.yml; Board relabels |
 

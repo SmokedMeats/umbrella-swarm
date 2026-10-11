@@ -2,9 +2,9 @@
 name: area-coordinator
 description: >
   What an area coordinator ("chief of staff" for one goal) does each cycle: recall
-  its brief, re-detect from GitHub, plan non-overlapping tickets, spawn cloud coding
-  agents, gather verification receipts, hand ready PRs to Dispatch, set lanes after
-  merge, and write the brief back. Use when launched by /swarm with an area packet.
+  its brief, re-detect from GitHub, plan non-overlapping tickets, spawn coding
+  workers (shape picked by runtime), gather verification receipts, hand ready PRs
+  to Dispatch, set lanes after merge, and write the brief back. Use when launched by /swarm with an area packet.
   Delegates; never writes product code. Runs umbrella-skills and Matt's skills
   by name through its own subagents (both must be installed alongside).
 disable-model-invocation: true
@@ -96,6 +96,9 @@ GitHub wins over the brief.
 - Open tickets with `area:<you>` and your milestones: Status, labels, blocked-by, ACs.
 - Your open PRs: checks, receipt, review state, behind <dev-branch> or not.
 - Merges into <dev-branch> since your last cycle (yours and others').
+- Sibling-session workers: `get_session` for status, `list_events` for the final
+  report, then fetch the pushed branch. Re-arm the `send_later` check-in while any
+  are still working.
 - The swarm state issue: are you paused? Your merge tier? Your leases?
 
 Paused → rewrite the brief, post a cycle comment, stop.
@@ -124,22 +127,63 @@ Paused → rewrite the brief, post a cycle comment, stop.
   parent for the lease in ESCALATE. Do not edit it without the lease.
 - **Batch by root cause.** Several reports that look like one bug become one
   investigation (`/diagnosing-bugs`), not one agent each.
-- **Cap:** at most `caps.coding_subagents_per_area` coding agents. On a rate limit,
-  spawn nothing more this cycle and note it in the brief.
+- **Cap:** at most `caps.coding_subagents_per_area` coding workers, and never past
+  `caps.coding_subagents_total` across the swarm. Both count every worker on any
+  runtime (`/swarm` **Workers by runtime**). Keep them as a rolling window: refill a
+  slot as each worker finishes, never in blocking batches that wait on the slowest.
+  On a rate limit, spawn nothing more this cycle and note it in the brief.
+- **Shared helpers first.** Before workers start, list the shared helpers that
+  already exist for this batch's kind of change (a retry helper, a fetch wrapper, a
+  test fixture) and put them in every worker brief with "use these; don't add new
+  ones". If the batch needs a new shared helper, land it first as its own small
+  ticket (one worker, before the batch). The tickets that use it branch after it
+  merges, and their briefs carry that ticket's report: a dependency is a context
+  relay, not just an order (pstack `orchestrate.md`).
+  Why: in the 2026-10-11 run six workers each wrote the same retry helper, five of
+  them conflicting in one shared file (pstack principle
+  `separate-before-serializing-shared-state`).
 
 ### 4. Spawn
 
-One cloud agent per ticket. Ship mode PR is forced for cloud agents: one ticket, one
-branch, one PR into `<dev-branch>`. Use the implement-ticket packet from
-`umbrella/DELEGATION.md` and the `/implement` **Child rules**, plus:
+One worker per ticket. Ship mode PR is forced for every worker: one ticket, one
+branch, one PR into `<dev-branch>`.
+
+**Pick the worker's shape by runtime** (`/swarm` **Workers by runtime**):
+
+- Cursor cloud → a cloud agent. The caps are the only limit.
+- Claude Code → before **each** in-process spawn, run the memory check
+  (`available - caps.memory_reserve_gb ≥ caps.per_worker_memory_gb`). Passes →
+  in-process subagent. Fails → a sibling session (`create_session`) if
+  `caps.sibling_sessions_allowed`, else queue the ticket for next cycle. A founder's
+  "as many as needed" never overrides the memory check.
+  Why: in-process workers share one container's memory; the caps don't know that.
+- Sibling session → the brief carries the full packet (nothing by path to your
+  `/tmp` or scratchpad), names the one branch the worker pushes, and you arm a
+  check-in (`send_later`) to read its result with `get_session` / `list_events`.
+  It can't message you back; you hear only if a turn fails.
+
+Use the implement-ticket packet from `umbrella/DELEGATION.md` and the `/implement`
+**Child rules**, plus:
 
 ```text
 MILESTONE_GOAL  the milestone's goal line, including Why   ← layer 2
 HOUSE_GOAL    the house goal line with its done-check   ← layer 3; keep it in view while building
 SKILLS        by name: /implement child rules (v1), /tdd (Matt) [+ /prototype, /codebase-design as needed]
 TICKET        # + URL + So that line + ACs (+ sub-issues)
+SHAPE         cursor-cloud | in-process | sibling-session · BRANCH <the only branch you push>
 PR_RULES      Mode B solo: this agent owns its branch; push only that branch;
-              never push <dev-branch>, Preview, master; never merge
+              never push <dev-branch>, Preview, master, or another worker's branch; never merge
+SHARED_HELPERS  <existing helpers for this kind of change: path · what it does>. Use these.
+              Don't add a new shared helper; if you need one, stop and report it.
+              Why: six copies of one retry helper, five conflicting (2026-10-11).
+HEAVY_GATES   type check, `verify`, `commands.pr_ready` and multi-suite test runs:
+              `flock <caps.heavy_gate_lock> <command>`. Single-file test runs: no lock.
+              Why: ~5 type checks at once in one container → 7 OOM kills (2026-10-11).
+RUN_TO_END    run every gate in the foreground to its exit code; never end a turn
+              "waiting for results".
+KILLED        exit 137 or 143 is a kill (out of memory), not red code: re-run under the
+              lock; never report it as a type error or a FAIL rung. Killed again under
+              the lock → report "killed twice under lock (memory)"; the rung is not run.
 SIZE          stay under caps.pr_soft_cap_files; if not, stop and report a split
 DOCS_LAST     do not edit hot docs (areas.yml hot_files); list the doc hits in the report
 VERIFY        run skills/verify-own-work/SKILL.md for rungs <area rungs>; paste the receipt
@@ -154,17 +198,33 @@ Brief opening order: standing rules, then the rule card; ticket / files / findin
 
 ### 5. Review each returned PR
 
+0. **Early duplicate scan, while workers are still building.** Cheap: a file
+   listing, no type check. For each worker branch,
+   `git diff --name-only --diff-filter=A origin/<dev-branch>...origin/<branch>`, and
+   look for new files in shared folders (the ones `SHARED_HELPERS` points into). Two
+   branches adding the same kind of helper → fold the second into the first now, before
+   review, not at merge.
+   Why: a duplicate found at merge is a conflict (five of six retry-helper copies
+   conflicted on 2026-10-11); found early it is a one-line note.
 1. Receipt complete for your rungs ([verify-own-work](../verify-own-work/SKILL.md)),
    including the AC table (layer 4: every AC checked with proof).
-   Verifier fan-out per `caps.verifier_fanout`.
-2. `build-verifier` PASS, and `/code-review` (with `/blast-radius`) has no in-scope
+2. **One independent verifier per ticket**: an agent that didn't write it, with
+   fan-out per `caps.verifier_fanout` (`0` only for one-command checks, where you
+   spot-check the receipt yourself; see verify-own-work **Fan-out**). It gives the
+   verdict and records the VERDICT line (head SHA, base SHA, patch-id). Green CI or
+   a bot review is not a verdict. No combined check across tickets; cross-ticket
+   breakage is caught at merge (`/swarm` **Merge path**).
+   Why: pstack `shipping.md`; the writer can't see what it misread.
+3. `build-verifier` PASS, and `/code-review` (with `/blast-radius`) has no in-scope
    findings. Findings go back to the same ticket (`/implement` **Build loop**).
    Use `/pit-of-success` on footgun seams and `/codebase-design` before a new module.
-3. **Docs last:** rebase the PR branch on the current <dev-branch> tip, then add
+4. **Docs last:** rebase the PR branch on the current <dev-branch> tip, then add
    the living-doc edits (P* leaf, KNOBS, admin guide, Effect Schema row, module
    intent) in one final commit. Append-only docs keep both sides on conflict.
-4. Re-run `project.yml` `commands.pr_ready` after that commit. Paste the new PASS line.
-5. PR body follows umbrella `BUILD-STANDING.md` **PR briefing**. Status
+5. Re-run `project.yml` `commands.pr_ready` after that commit (under the heavy-gate
+   lock). Paste the new PASS line. The docs-only commit keeps the code verdict
+   (patch-id rule); record the new head SHA.
+6. PR body follows umbrella `BUILD-STANDING.md` **PR briefing**. Status
    **Ready to merge**. Hand to Dispatch.
 
 ### 6. After merge (Dispatch's after-merge ping)

@@ -46,9 +46,9 @@ Order is the plan: the house in focus first. Tickets that share files run one af
 
 ## In flight
 
-| Ticket | PR | Agent | Highest rung passed | Notes |
-| --- | --- | --- | --- | --- |
-| #<n> | #<pr> | <agent id> | R<k> | |
+| Ticket | PR | Agent | Shape | Highest rung passed | Notes |
+| --- | --- | --- | --- | --- | --- |
+| #<n> | #<pr> | <agent id> | cursor-cloud / in-process / sibling `<session id>` · branch `<name>` | R<k> | |
 
 ## Ready to merge (with Dispatch)
 

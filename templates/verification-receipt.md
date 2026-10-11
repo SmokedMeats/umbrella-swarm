@@ -2,6 +2,7 @@
 Paste under "## Verification" in the PR body (umbrella BUILD-STANDING.md PR briefing).
 Every rung the area lists (areas.yml verify_rungs) must be PASS, or N/A with a reason.
 A missing rung is a gap, not a pass. Dispatch refuses an incomplete receipt.
+The VERDICT line is written by an agent that didn't write the PR: the verifier, or the coordinator at fan-out 0 (verify-own-work).
 -->
 
 ## Verification
@@ -35,6 +36,10 @@ MIGRATION    none | <file> · the founder approved: <link> · applied to test DB
 LEASES       none | <paths held>
 DOCS LAST    living docs written after rebase in <commit sha>: <paths> | none
 OVERLAPS     other Ready PRs sharing paths: <#pr: paths> | none
+KILLS        none | <gate> exit 137/143 → re-run under heavy_gate_lock: PASS | killed again (rung not run)
+
+VERDICT      pass | fail · by <verifier agent, not the author> · head <sha> · base <dev-branch sha> · patch-id <id>
+             (after a rebase: same patch-id, or a change only in docs/tests/lint config → holds, R0 + CI re-run; code changed → re-verified, new line)
 ```
 
 </details>

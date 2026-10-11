@@ -91,6 +91,8 @@ Only a few areas are Active at a time (the example uses 5; typical range 4–6).
 
 Raise the cap only when receipts are trusted, review stays light, there are no rate-limit stalls or cross-area conflicts, and reverts are rare. The rules live in [PLAN.md](docs/PLAN.md) and `caps` in your `areas.yml`.
 
+Where workers run matters too. On Cursor cloud each worker gets its own VM. On Claude Code, subagents share the coordinator's container, so a coordinator checks free memory before each spawn and sends the overflow to sibling cloud sessions; heavy checks (type check, `pr_ready`) take a shared lock so only one runs at a time. The worker caps count every worker on any runtime. Details: `/swarm` **Workers by runtime**.
+
 ## Every goal has a why
 
 Work is split into four layers. Each one names its goal, its why, and how you know it is done.
