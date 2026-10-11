@@ -43,6 +43,11 @@ function git(...a) {
   if (r.status !== 0) throw new Error(`git ${a.join(' ')} failed: ${r.stderr || r.error}`);
   return r.stdout;
 }
+// Text with line endings normalized to \n and a UTF-8 BOM dropped (Windows
+// checkouts with core.autocrlf=true, editors that save CRLF or a BOM).
+function normEol(text) {
+  return text.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
+}
 function die(msg) {
   console.error(msg);
   process.exit(1);
@@ -79,8 +84,8 @@ function findDenylist() {
 // A leading (?i) makes that line case-insensitive. Default is case-sensitive.
 function loadPatterns(file) {
   const out = [];
-  readFileSync(file, 'utf8')
-    .split(/\r?\n/)
+  normEol(readFileSync(file, 'utf8'))
+    .split('\n')
     .forEach((line, i) => {
       const t = line.trim();
       if (!t || t.startsWith('#')) return;
@@ -137,13 +142,13 @@ function commitsIn(revs) {
 function scanDenylistRange(revs) {
   const hits = [];
   // commit messages
-  const msgs = git('log', '--format=%x00%H%n%B', ...revs);
+  const msgs = normEol(git('log', '--format=%x00%H%n%B', ...revs));
   for (const block of msgs.split('\0').filter(Boolean)) {
     const [sha, ...body] = block.split('\n');
     for (const l of body) if (l.trim()) hits.push(...denyHits(`commit ${sha.slice(0, 7)} message`, l));
   }
   // added lines + new paths, per commit (catches text added then removed later)
-  const patch = git('log', '-p', '-U0', '--no-color', '--no-ext-diff', '--format=%x00%H', '--diff-merges=first-parent', ...revs);
+  const patch = normEol(git('log', '-p', '-U0', '--no-color', '--no-ext-diff', '--format=%x00%H', '--diff-merges=first-parent', ...revs));
   let sha = '';
   let file = '';
   for (const l of patch.split('\n')) {
@@ -177,9 +182,8 @@ function scanTree() {
       continue;
     }
     if (buf.includes(0)) continue; // binary
-    buf
-      .toString('utf8')
-      .split(/\r?\n/)
+    normEol(buf.toString('utf8'))
+      .split('\n')
       .forEach((l, i) => hits.push(...denyHits(`${f}:${i + 1}`, l)));
   }
   return hits;
@@ -248,8 +252,8 @@ function defaultBase() {
 // ---------- main ----------
 let ok = true;
 if (flag('--pre-push')) {
-  const stdin = readFileSync(0, 'utf8');
-  for (const line of stdin.split(/\r?\n/).filter(Boolean)) {
+  const stdin = normEol(readFileSync(0, 'utf8'));
+  for (const line of stdin.split('\n').filter(Boolean)) {
     const [localRef, localSha, , remoteSha] = line.split(/\s+/);
     if (!localSha || ZERO.test(localSha)) continue; // branch delete
     // Everything reachable from what we push that no remote-tracking ref has yet.

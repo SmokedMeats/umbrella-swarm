@@ -129,8 +129,8 @@ Paused → rewrite the brief, post a cycle comment, stop.
   investigation (`/diagnosing-bugs`), not one agent each.
 - **Cap:** at most `caps.coding_subagents_per_area` coding workers, and never past
   `caps.coding_subagents_total` across the swarm. Both count every worker on any
-  runtime (`/swarm` **Workers by runtime**). Keep them as a rolling window: refill a
-  slot as each worker finishes, never in blocking batches that wait on the slowest.
+  runtime (`/swarm` **Workers by runtime**). Refill them as a rolling window (v1
+  DELEGATION **Child shape by runtime**, **Cap**).
   On a rate limit, spawn nothing more this cycle and note it in the brief.
 - **Shared helpers first.** Before workers start, list the shared helpers that
   already exist for this batch's kind of change (a retry helper, a fetch wrapper, a

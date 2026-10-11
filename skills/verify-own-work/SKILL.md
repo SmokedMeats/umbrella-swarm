@@ -118,41 +118,29 @@ VERDICT  pass | fail · by <verifier agent> · head <HEAD_SHA> · base <BASE_SHA
 
 ### Verdict across a rebase (patch-id rule)
 
-The rule is v1 DELEGATION **Recheck at merge**. After any merge or rebase of
-`<dev-branch>` into the PR (docs last, Dispatch's merge-time update), recompute the
-patch-id on the new head against its new base:
-
-- **Unchanged** → the verdict holds. Run `commands.pr_ready` once on the new head
-  (**Check budget**, Merge row) and check mergeability. Nothing else.
-- **Changed only in docs, tests or lint config** (for example the docs-last commit)
-  → the code verdict holds; the same single `commands.pr_ready` run and
-  mergeability check on the new head.
-- **Changed in code** (a conflict was resolved, code was added) → the verifier
-  re-verifies the rungs the change touches and writes a new VERDICT line.
-
-The docs/tests/lint-config case is a swarm addition for the docs-last commit
-(pstack `shipping.md`); v1 re-verifies on any patch change.
-
-Never accept a matching commit message or a green check from an older SHA instead.
-
-Why: pstack `autopilot-full.md`; a rebase that didn't change the patch didn't change
-what was verified, and one that did must be looked at again.
+The rule is v1's: umbrella `DELEGATION.md` **Recheck at merge**, **Patch-id rule**.
+After any merge or rebase of `<dev-branch>` into the PR (docs last, Dispatch's
+merge-time update), recompute `PATCH_ID` on the new head against its new base.
+Unchanged, or changed only in docs, tests or lint config (the docs-last commit) →
+the verdict holds; run `commands.pr_ready` once on the new head (**Check budget**,
+Merge row) and check mergeability. Changed in code → the verifier re-verifies and
+writes a new VERDICT line.
 
 ## Fan-out (cost knob)
 
-Scale verification to the ticket (pstack `orchestrate.md` **Verification**):
+`caps.verifier_fanout` is the swarm's knob for how many verifiers a ticket gets.
+Which kind is v1's call: `build-verifier` **Which of the two** (inline by the
+conductor for a one-command ticket; otherwise a separate verifier, on a different
+model family from the writer when the harness allows).
 
-- `0`: only when the whole check is one cheap command (docs-only, config, a
-  copy change). The worker runs it and reports the output; the coordinator
-  spot-checks the receipt and writes the VERDICT. Still not the author.
+- `0`: a one-command ticket (docs-only, config, a copy change). The worker runs it
+  and reports the output; the coordinator audits the receipt inline and writes the
+  VERDICT. Still not the author.
 - `1` (default, and the floor for any behavior change): one separate verifier
   agent re-runs R0–R3, does R5 lightly, and writes the VERDICT.
 - `3`: for risky PRs (grading math, money, shared contracts). Lauren tunes the
   same knob down from 10 to 1 when tokens matter [53:30].
 
-Run the verifier on a different model family from the worker when you can.
-Why: a verifier agent whose whole job is re-running one command is ceremony; one
-that shares the worker's model shares its blind spots (pstack `orchestrate.md`).
 
 ## Fix loop
 
