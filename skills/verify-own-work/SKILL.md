@@ -151,7 +151,7 @@ row: one `commands.pr_ready` on the new head, plus the rungs a changed patch nee
 
 ## Receipt
 
-Use [verification-receipt.md](../../templates/verification-receipt.md). Paste it
+Use [verification-receipt.md](../swarm/templates/verification-receipt.md). Paste it
 under `## Verification` in the PR body (umbrella `BUILD-STANDING.md` **PR briefing**).
 Dispatch refuses a PR whose receipt lacks a rung its area lists or a VERDICT line.
 

@@ -77,22 +77,27 @@ and **Matt Pocock's skills pack**. It calls their skills by name and copies none
 them. Before Start, probe the same way `/umbrella` §0 does:
 
 1. Matt's pack: `/setup-matt-pocock-skills`, `/domain-modeling`, `/tdd`,
-   `/diagnosing-bugs`, `/codebase-design`, `/prototype`, `/handoff`, `/research`,
-   `/simple-english`, `/writing-for-agents`.
-2. v1 umbrella-skills: `/umbrella` (+ companions `DELEGATION`, `BUILD-STANDING`,
-   `PROJECTS`, `DEVICE-QA`, `CLOSE-PARENTS`, `PARKED-TICKETS`, `CURSOR`),
-   `/umbrella-mode`, `/triage`, `/wayfinder`, `/grill-me`, `/grilling`, `/to-spec`,
-   `/to-tickets`, `/implement`, `/code-review`, `/blast-radius`, `build-verifier`,
-   `device-qa-verifier`, `/how`, `/why`, `/teach`, `/teach-me`, `/principles`.
-3. Box workflows when present: `device-qa-agent`, `/audit`, `/pit-of-success`,
-   `/zero-tech-debt`, the promote workflows.
+   `/diagnosing-bugs`, `/codebase-design`, `/improve-codebase-architecture`,
+   `/prototype`, `/handoff`, `/research`, `/retro`, `/pr`, `/writing-for-agents`,
+   `/wait-what`, `/ask-matt`.
+2. SimpleEnglish ([AminBlg/SimpleEnglish](https://github.com/AminBlg/SimpleEnglish)):
+   `/simple-english`.
+3. v1 umbrella-skills: `/umbrella` (+ companions `DELEGATION`, `BUILD-STANDING`,
+   `CONVENTIONS`, `PRE-GRILL`, `PROJECTS`, `DEVICE-QA`, `CLOSE-PARENTS`,
+   `PARKED-TICKETS`, `CURSOR`, `PROJECT-CONFIG`), `/umbrella-mode`, `/triage`,
+   `/wayfinder`, `/grill-me`, `/grilling`, `/to-spec`, `/to-tickets`, `/implement`,
+   `/code-review`, `/blast-radius`, `build-verifier`, `device-qa-agent`,
+   `device-qa-verifier`, `/how`, `/why`, `/teach`, `/teach-me`, `/principles`,
+   `/pit-of-success`, `/zero-tech-debt`.
+4. Product-repo workflows, only when the repo ships them: `/audit`, the promote
+   workflows.
 
 Missing pack → stop and name the install, the same as `/umbrella` §0. Do not paste
 a v1 skill's text into this pack. If v1 changes, umbrella-swarm follows.
 Why: one copy of each rule. Two copies drift.
 
-Who runs each v1 skill in the swarm, and when, is the **Skill map** in
-`docs/PLAN.md` §6 and the README. No v1 skill is dropped. Anything without a swarm
+Who runs each skill in the swarm, and when, is the [Skill map](../swarm/SKILL-MAP.md)
+(`swarm/SKILL-MAP.md`). No v1 skill is dropped. Anything without a swarm
 home (`/teach`, `/teach-me`, `/ask-matt`) stays available through the parent or
 `/umbrella`.
 
@@ -109,7 +114,7 @@ finishable) > ticket. Each agent reads the layer above it.
 | Ticket | `So that: <house goal>` (or milestone goal if unhoused) + link (its why) + `## Acceptance criteria` | Verifiers |
 
 A house (`umbrella:<house>`) has its own focused goal, narrower than its milestone
-([house-goal.md](../../templates/house-goal.md)). Coordinators work house by house
+([house-goal.md](../swarm/templates/house-goal.md)). Coordinators work house by house
 and use the house done-check to know they're finished and to pick the next. One
 house = one milestone = one area. No fifth layer: sub-issues split a ticket.
 Why: a milestone is too big to steer by every cycle; a house check can be answered
@@ -132,7 +137,10 @@ each cycle.
 
 ## Standing rules this mode keeps
 
-Repeat these to every coordinator packet:
+Every coordinator packet carries this list by reference (`STANDING`: this section of
+`swarm-mode/SKILL.md`; the coordinator reads it). Paste it verbatim only for a
+coordinator or worker that cannot read installed skills (umbrella `DELEGATION.md`
+**Sibling contract**):
 
 - Every agent brief starts with the same opening block: standing rules, then the rule card; the changing part (ticket, files, findings) goes last so briefs within the hour share a cached prefix.
 - Every product issue has a milestone and is on the configured Project board with a Status.

@@ -22,8 +22,8 @@ issue, all labeled `swarm:state`, on milestone **Continuous**, on the configured
 | Issue | One per | Template |
 | --- | --- | --- |
 | Swarm state | repo | all areas with status (Active / Next / Parked / Retired) and rank, caps, lease table, merge tiers (below) |
-| Area brief | Active or paused area | [coordinator-brief.md](../../templates/coordinator-brief.md) |
-| Findings buffer | area | [findings-buffer.md](../../templates/findings-buffer.md) |
+| Area brief | Active or paused area | [coordinator-brief.md](templates/coordinator-brief.md) |
+| Findings buffer | area | [findings-buffer.md](templates/findings-buffer.md) |
 
 These are not work tickets. Nobody pulls them. Kanban hides `label:swarm:state`.
 
@@ -46,13 +46,13 @@ These are not work tickets. Nobody pulls them. Kanban hides `label:swarm:state`.
    a Project Status (see `project.yml`), and an `area:<slug>` label. If not, hand the list to Board
    (`/triage`). Do not label them yourself; triage stays on Board.
 3. **Layered goals.** Each area milestone's description starts with its goal line
-   ([milestone-goal.md](../../templates/milestone-goal.md)):
+   ([milestone-goal.md](templates/milestone-goal.md)):
    `Ships <X>; done when <user-visible check with real numbers>. Why: <reason>. Area: <slug>.`
-   Each live ticket has a `So that:` line ([ticket-goal.md](../../templates/ticket-goal.md))
+   Each live ticket has a `So that:` line ([ticket-goal.md](templates/ticket-goal.md))
    above its AC checkboxes. Missing ones go to Board as triage hits. Draft milestone
    lines for the founder to confirm; don't invent numbers. Take them from the tickets.
    Each live house in those areas has its own **house goal**
-   ([house-goal.md](../../templates/house-goal.md)): one user-visible outcome,
+   ([house-goal.md](templates/house-goal.md)): one user-visible outcome,
    narrower than the milestone, with a done-check in real numbers and a `Why:` naming
    the milestone goal. Draft missing ones from the tickets (`areas.yml` `houses[].goal`)
    for the founder to confirm. A house too big for one outcome, spanning two milestones, or
@@ -80,18 +80,24 @@ SKILL_PATH    skills/area-coordinator/SKILL.md (umbrella-swarm)
 V1_SKILLS     by name from umbrella-skills: /wayfinder /to-spec /to-tickets /implement
               /code-review /blast-radius build-verifier /how /why; Matt: /tdd /prototype
               /diagnosing-bugs /codebase-design /research /handoff
-COMPANIONS    v1 umbrella/DELEGATION.md, umbrella/BUILD-STANDING.md, umbrella/PROJECTS.md,
-              umbrella/DEVICE-QA.md; umbrella-swarm skills/verify-own-work/SKILL.md, skills/recall/SKILL.md
+COMPANIONS    v1 umbrella/DELEGATION.md, umbrella/BUILD-STANDING.md, umbrella/CONVENTIONS.md,
+              umbrella/PRE-GRILL.md, umbrella/PROJECTS.md, umbrella/DEVICE-QA.md,
+              umbrella/PROJECT-CONFIG.md; umbrella-swarm skills/verify-own-work/SKILL.md,
+              skills/recall/SKILL.md, skills/swarm/SKILL-MAP.md
 FORBIDDEN     umbrella/SKILL.md; running a grill with the founder; merge outside MERGE_TIER;
               master/Preview/OTA/migrate; editing another area's leased file; triage labels
-STANDING      the standing rules list in /swarm-mode
+STANDING      by path: swarm-mode/SKILL.md **Standing rules this mode keeps** (paste only for a
+              coordinator that cannot read installed skills)
 ```
 
 **Brief opening order.** Standing rules, then the rule card; the changing part (ticket, files, findings) last so briefs within the hour share a cached prefix (same rule as `/swarm-mode` **Standing rules**).
 
 Where a coordinator runs is a hosting choice: a Cursor Project (cloud coordinator
 with its own computer), a Claude Code cloud session, or a durable Grok bot lane. All
-read the same brief. Where its **workers** run decides how many can run safely:
+read the same brief. A cloud coordinator reads the skills from the product repo's
+synced skill folders (`sync-workspace.mjs` writes this pack there too) or from its
+environment's install; if neither has them, see umbrella `DELEGATION.md` **Sibling
+contract** (paste the named sections, never a whole skill). Where its **workers** run decides how many can run safely:
 
 ## Workers by runtime
 
@@ -118,10 +124,8 @@ cloud. The `Agent` tool → Claude Code; `create_session` present and
 agent, in-process subagent, or sibling session. There is no separate sibling cap.
 A coordinator that runs `/implement` as conductor is also bound by v1's
 `limits.max_children`. In Claude Code the memory check only picks the **shape** of
-the next worker inside those caps. The check is v1's: umbrella `DELEGATION.md`
-**Child shape by runtime** (available = the smaller of `MemAvailable` and the cgroup
-headroom; in-process only while `available - limits.mem_reserve_gb ≥
-limits.child_mem_gb`). Fails → a sibling session if `sibling_sessions_allowed`,
+the next worker inside those caps; the check is v1's (umbrella `DELEGATION.md`
+**Child shape by runtime**). Fails → a sibling session if `sibling_sessions_allowed`,
 else queue the ticket for the next cycle.
 
 The memory check never applies on Cursor cloud. "Use as many agents as needed"
@@ -130,21 +134,11 @@ it, workers become sibling sessions or wait.
 Why: the caps are about rate limits, review load and collisions, which don't care
 where a worker runs; memory is about one container, so it only picks the shape.
 
-**Sibling-session contract** (v1 DELEGATION **Sibling contract**, summarized).
-Separate containers share no filesystem, so:
-
-- The brief is the full context packet: standing rules, rule card, ticket, ACs,
-  shared helpers. Nothing by reference to `/tmp`, a scratchpad, or a
-  file only the coordinator's container has.
-- The worker pushes only its own ticket branch, named in the brief. Never
-  `<dev-branch>`, Preview, master, or another worker's branch. The coordinator
-  fetches that branch to review it.
-- A cloud sibling can't message back. The coordinator schedules a check-in
-  (`send_later`) and reads the result with `get_session` (status) and
-  `list_events` (final report). A `child-session-event` arrives only when a turn
-  fails; a clean finish is silent.
-- Cost: each sibling is a full session. Use them when the batch needs more workers
-  than memory allows, not by default.
+**Sibling sessions** follow v1 DELEGATION **Sibling contract**: full context in the
+brief, the worker pushes only its own ticket branch, the coordinator reads the result
+on a `send_later` check-in (`get_session`, `list_events`), and named skills must be
+readable in the sibling's checkout or environment. Each sibling is a full session:
+use them when the batch needs more workers than memory allows, not by default.
 
 ## Resume
 
@@ -212,21 +206,11 @@ One area per ticket. A house never splits across areas.
 
 ## When to create and retire
 
-The parent and every coordinator follow the same table (full version in
-[/area-coordinator](../area-coordinator/SKILL.md) and `docs/PLAN.md` §4.7):
-
-| Level | Must have before it exists | Create when | Who creates | Retire when |
-| --- | --- | --- | --- | --- |
-| Area | Goal (end-user story) + Why it matters + done-signal | A burst of 3+ related issues fits no area's goal | Coordinator or parent proposes; **the founder approves**; starts Next or Parked | Done-signal passes, or the founder drops it (quality/infra areas: Parked, never retired) |
-| Milestone | `Ships …; done when <numbers>. Why: …. Area: <slug>.` | A slice of an area goal no milestone covers | Coordinator or parent proposes; **the founder approves** | Done-check passes → Hit, closed, proof in the brief (continuous queues never Hit) |
-| House | `House <slug>: <one outcome>; done when <numbers>. Why: <milestone goal>. Area: <slug>.` | The current house's done-check passed and the next finishable outcome has no house | **Coordinator** | Done-check passes → PASS + evidence in the brief |
-| Ticket | `So that:` line + `## Acceptance criteria` with ≥ 2 checkable boxes | Coordinator splits a house (`/to-tickets` after a lock, or directly) | **Coordinator** | Every AC checked with proof and the lane is Done (merge never marks Done) |
-
-**Refuse** any create that lacks the "must have" column, whoever asks for it.
-Why: an item without a done-check can't be finished, verified or retired.
-Why the founder approves areas and milestones: they use cap slots and change what ships.
-Why coordinators create houses and tickets: those are working units inside a
-milestone the founder already approved.
+The parent and every coordinator follow one table: [/area-coordinator](../area-coordinator/SKILL.md)
+**When to create and retire**. In short: nothing is created without goal + why +
+done-check (a ticket: `So that:` + ACs); the founder approves areas and milestones;
+coordinators create houses and tickets; anything retires when its done-check passes.
+**Refuse** any create that lacks the table's "must have" column, whoever asks for it.
 
 ## Theme bursts: fold or new area
 
@@ -306,26 +290,12 @@ A revert of a self-merged PR drops that area one tier and goes through `/correct
 
 ## Grills
 
-The coordinator prepares the pre-grill gap list (umbrella **Pre-grill**). The
+The coordinator prepares the pre-grill gap list (umbrella `PRE-GRILL.md`). The
 parent runs `/grilling` with the founder, using Context / Choices / Recommend with runner
 stories. After the lock: `/to-spec` → `/to-tickets` with the carry fields, then the
 area's coordinator picks up the tickets. No spec or ticket approval waits.
 
 ## Reuse v1 by name, don't copy
 
-| Need | Skill |
-| --- | --- |
-| Labels, milestone, house | `/triage` (Board) |
-| Interview | `/grilling` (+ `/grill-me` on wayfinder siblings) |
-| Spec, tickets | `/to-spec`, `/to-tickets` |
-| Build a ticket | `/implement` (child rules, Build loop, Close gate, End of house lanes) |
-| Review | `/code-review` (+ `/blast-radius`), `build-verifier` |
-| Footgun seams | `/pit-of-success` |
-| Module shape | `/codebase-design` |
-| Repeat corrections | `/correct` = umbrella **Repeated corrections** |
-| Phone | `device-qa-agent` (Mobile QA Engineer), `device-qa-verifier` |
-| Fog | `/wayfinder` |
-| Next/Parked houses | `/umbrella` (+ `/umbrella-mode`) |
-| Explain to the founder | `/how`, `/why`, `/teach`, `/simple-english`, `/wait-what` |
-
-Full table with who runs each skill and when: **Skill map** in `docs/PLAN.md` §6.
+Who runs which v1, Matt or SimpleEnglish skill, and when: [SKILL-MAP.md](SKILL-MAP.md).
+Name the skill; the agent reads the installed file.

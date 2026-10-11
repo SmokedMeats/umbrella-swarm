@@ -69,7 +69,7 @@ Then say `/swarm-mode` (or "start the swarm") in your agent.
 | [skills/area-coordinator](skills/area-coordinator/SKILL.md) | What a coordinator does each cycle, house by house. |
 | [skills/verify-own-work](skills/verify-own-work/SKILL.md) | The verification ladder (rungs R0–R7) and the receipt. |
 | [skills/recall](skills/recall/SKILL.md) | Rebuilds context from GitHub and transcripts after a restart. |
-| [templates/](templates/) | Coordinator brief, findings buffer, receipt, and goal-line templates. |
+| [skills/swarm/templates/](skills/swarm/templates/) | Coordinator brief, findings buffer, receipt, and goal-line templates. |
 | [areas.example.yml](areas.example.yml) | Example area map. Copy to `areas.yml` in your private config. |
 | [project.example.yml](project.example.yml) | Project settings (repo, branches, boards, `limits`). The same file as umbrella-skills'; change it there first. |
 | [MAINTAINING.md](MAINTAINING.md) | For maintainers: private vs public snapshot, `scripts/publish-public.sh`, and the one-copy rule with umbrella-skills. |
@@ -132,15 +132,7 @@ The umbrella-skills README, **Project config**, explains the private config layo
 
 ## Skill map
 
-| Skill | Who runs it | When |
-| --- | --- | --- |
-| `/swarm-mode` | Chief of Staff | Sticky swarm front door |
-| `/swarm` | Chief of Staff | Start, resume, pause, status, rotate |
-| `/area-coordinator` | One per Active area | Each cycle, house by house |
-| `/verify-own-work` | Worker or coordinator | Before a change asks for more merge autonomy |
-| `/recall` | Chief of Staff on restart | Rebuild state from GitHub and transcripts |
-| `/umbrella` (umbrella-skills) | Chief of Staff | A Next or Parked house the founder names |
-| `/grill-me` (umbrella-skills) | Chief of Staff with the founder | Live grilling (founder gate) |
+[skills/swarm/SKILL-MAP.md](skills/swarm/SKILL-MAP.md): every skill the swarm uses (this pack, umbrella-skills, Matt's pack, SimpleEnglish), who runs it, and when. It ships inside the `swarm` skill so installed agents can read it.
 
 ## Before pushing
 

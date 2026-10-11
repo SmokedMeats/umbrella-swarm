@@ -39,19 +39,22 @@ the installed v1 file.
 | Step | Skill (source) | Run by |
 | --- | --- | --- |
 | Fog in a milestone | `/wayfinder` (v1), `/research` (Matt) | worker you spawn |
-| Pre-grill gap list | umbrella **Pre-grill** (v1) | you; the parent runs `/grill-me` / `/grilling` with the founder |
+| Pre-grill gap list | umbrella `PRE-GRILL.md` (v1) | you; the parent runs `/grill-me` / `/grilling` with the founder |
 | After the grill lock | `/to-spec` → `/to-tickets` (v1), keeping `CARRY_FROM_GRILL` / `CARRY_FROM_SPEC` | worker you spawn |
 | Build a ticket | `/implement` child rules (v1), `/tdd`, `/prototype` + DESIGN-IT-TWICE, `/codebase-design` (Matt) | worker you spawn |
 | Repro is the work | `/diagnosing-bugs` (Matt) | worker you spawn |
 | Questions about the code | `/how`, `/why` (v1) | readonly worker |
 | Verify | `verify-own-work` (umbrella-swarm), `build-verifier` (v1) | worker, then verifier |
-| Review | `/code-review` + `/blast-radius` (v1), `/pit-of-success` (box) | verifier |
+| Review | `/code-review` + `/blast-radius`, `/pit-of-success` (v1) | verifier |
 | Lanes, close | `/implement` **End of house**, `DEVICE-QA.md`, `CLOSE-PARENTS.md`, `PROJECTS.md` (v1) | you |
-| Repeat correction | umbrella **Repeated corrections** = `/correct` (v1) | you log it; the `areas.yml` `quality_area` coordinator encodes it |
+| Repeat correction | umbrella `CONVENTIONS.md` **Repeated corrections** = `/correct` (v1) | you log it; the `areas.yml` `quality_area` coordinator encodes it |
+| Decision trail | umbrella `CONVENTIONS.md` **Decision trail** (v1) | you, in the brief's **Decisions** table, default on |
 | Session end | `/handoff` (Matt), and the brief issue | you |
 
-Missing a pack → ESCALATE to the parent. Do not paste a v1 skill into a packet.
-Full map: **Skill map** in `docs/PLAN.md` §6.
+Missing a pack → ESCALATE to the parent. Do not paste a v1 skill into a packet; name
+it. Exception: a cloud or sibling worker that cannot read installed skills gets the
+named *sections* pasted (umbrella `DELEGATION.md` **Sibling contract**).
+Full map: [SKILL-MAP.md](../swarm/SKILL-MAP.md).
 
 ## When to create and retire
 
@@ -112,7 +115,7 @@ Paused → rewrite the brief, post a cycle comment, stop.
   unhoused), goes back to Board
   (`/triage`) or `/to-tickets`. Do not invent ACs or goal lines.
 - **Work house by house.** Each house has its own goal line
-  ([house-goal.md](../../templates/house-goal.md)) with a numeric done-check. Pick
+  ([house-goal.md](../swarm/templates/house-goal.md)) with a numeric done-check. Pick
   the house that moves its milestone goal (and so your area goal) most. Stay on it
   until its done-check passes, write the proof in the brief, then pick the next.
   Run a second house at once only if its files don't overlap and a coding slot is
@@ -248,7 +251,7 @@ Brief opening order: standing rules, then the rule card; ticket / files / findin
 
 ### 7. Write back
 
-- Rewrite the brief issue body ([coordinator-brief.md](../../templates/coordinator-brief.md)).
+- Rewrite the brief issue body ([coordinator-brief.md](../swarm/templates/coordinator-brief.md)).
 - Append findings that are not this cycle's work to the findings buffer. Don't
   fix them now.
 - Log corrections: a second correction of the same kind → `/correct` (lint
