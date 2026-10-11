@@ -283,13 +283,18 @@ Dispatch:
 4. **Tier 0:** waits for the founder's approval. **Tier 1/2:** merges only if the PR fits
    that tier's rules on the swarm state issue. Otherwise waits for the founder.
 5. **Lands one PR at a time from the bottom (stack base first, else oldest Ready), each rechecked on the current tip.**
-   Before each merge: rebase the PR onto the current `<dev-branch>` tip, re-run
-   `commands.pr_ready` (the `commands.pr_ready_pass` line must name that tip) and CI
-   on the rebased head, and apply the **patch-id rule**
+   Before each merge, if `<dev-branch>` moved since the verdict: merge or rebase it
+   into the PR, run `commands.pr_ready` **once** on the new head (the
+   `commands.pr_ready_pass` line must name that tip; it is the CI for `<dev-branch>`
+   PRs), and push with `commands.push_skip_hook` when the pre-push hook would re-run
+   that same check. Then the **patch-id rule**
    ([verify-own-work](../verify-own-work/SKILL.md) **Verdict across a rebase**):
-   same patch-id → the verdict holds; changed → back to the verifier first.
+   same patch-id, or a change only in docs/tests/lint config → the verdict holds;
+   code changed → back to the verifier first. Base unchanged → the verifier's
+   `pr_ready` run stands. Budget: verify-own-work **Check budget per ticket**.
    There is no combined pre-merge check of several PRs: cross-ticket breakage shows
-   up here, on the next PR's rebased head.
+   up here, on the next PR's updated head, and the consuming repo's scheduled heavy
+   gate (`commands.scheduled_heavy_gate`) covers the merged tip.
    Why: each landed PR changes the trunk the next one runs on; checking each against
    the real tip catches what a batch check on a guessed tip misses (pstack
    `autopilot-full.md`).

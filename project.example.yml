@@ -18,6 +18,9 @@ branches:
 commands:
   pr_ready: "pnpm run check:pr-ready"       # Mode B gate; paste PASS line in PR body
   pr_ready_pass: "check:pr-ready PASS"      # literal PASS line Dispatch looks for (names the dev tip)
+  verify: "pnpm --filter {pkg} run verify"   # worker's per-package gate ({pkg} = each touched package); no pr_ready
+  push_skip_hook: "HUSKY=0 git push"         # merge-time push after pr_ready passed on this head (hook would re-run it)
+  scheduled_heavy_gate: "npm run preflight:development"  # runs on a schedule over the merged tip, not per ticket
   db_migrate: "cd backend && npm run db:migrate:all"  # when a new migration file is added; carries its own cd
   preflight_master: "npm run preflight:master"        # master bar (runs cycles; verify does not)
   preflight_cycles: "npm run preflight:governance:cycles"

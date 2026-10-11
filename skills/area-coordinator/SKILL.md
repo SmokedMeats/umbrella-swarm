@@ -176,7 +176,7 @@ PR_RULES      Mode B solo: this agent owns its branch; push only that branch;
 SHARED_HELPERS  <existing helpers for this kind of change: path · what it does>. Use these.
               Don't add a new shared helper; if you need one, stop and report it.
               Why: six copies of one retry helper, five conflicting (2026-10-11).
-HEAVY_GATES   type check, `verify`, `commands.pr_ready` and multi-suite test runs:
+HEAVY_GATES   type check, `commands.verify` and multi-suite test runs:
               `flock <caps.heavy_gate_lock> <command>`. Single-file test runs: no lock.
               Why: ~5 type checks at once in one container → 7 OOM kills (2026-10-11).
 RUN_TO_END    run every gate in the foreground to its exit code; never end a turn
@@ -186,7 +186,9 @@ KILLED        exit 137 or 143 is a kill (out of memory), not red code: re-run un
               the lock → report "killed twice under lock (memory)"; the rung is not run.
 SIZE          stay under caps.pr_soft_cap_files; if not, stop and report a split
 DOCS_LAST     do not edit hot docs (areas.yml hot_files); list the doc hits in the report
-VERIFY        run skills/verify-own-work/SKILL.md for rungs <area rungs>; paste the receipt
+VERIFY        run skills/verify-own-work/SKILL.md for rungs <area rungs>; paste the receipt.
+              Your checks: `commands.verify` for each touched package + your own tests,
+              on the committed head. Not `commands.pr_ready`: the verifier and Dispatch run it.
 FORBIDDEN     leased files you don't hold; migrations without the parent's go;
               Project Status; closing issues; triage labels
 ```
@@ -208,7 +210,8 @@ Brief opening order: standing rules, then the rule card; ticket / files / findin
    conflicted on 2026-10-11); found early it is a one-line note.
 1. Receipt complete for your rungs ([verify-own-work](../verify-own-work/SKILL.md)),
    including the AC table (layer 4: every AC checked with proof).
-2. **One independent verifier per ticket**: an agent that didn't write it, with
+2. **One independent verifier per ticket**: an agent that didn't write it, running
+   `commands.verify` + `commands.pr_ready` at the verdict SHA, with
    fan-out per `caps.verifier_fanout` (`0` only for one-command checks, where you
    spot-check the receipt yourself; see verify-own-work **Fan-out**). It gives the
    verdict and records the VERDICT line (head SHA, base SHA, patch-id). Green CI or
@@ -218,12 +221,12 @@ Brief opening order: standing rules, then the rule card; ticket / files / findin
 3. `build-verifier` PASS, and `/code-review` (with `/blast-radius`) has no in-scope
    findings. Findings go back to the same ticket (`/implement` **Build loop**).
    Use `/pit-of-success` on footgun seams and `/codebase-design` before a new module.
-4. **Docs last:** rebase the PR branch on the current <dev-branch> tip, then add
+4. **Docs last:** merge or rebase the current <dev-branch> tip into the PR branch, then add
    the living-doc edits (P* leaf, KNOBS, admin guide, Effect Schema row, module
    intent) in one final commit. Append-only docs keep both sides on conflict.
-5. Re-run `project.yml` `commands.pr_ready` after that commit (under the heavy-gate
-   lock). Paste the new PASS line. The docs-only commit keeps the code verdict
-   (patch-id rule); record the new head SHA.
+5. Don't re-run `commands.pr_ready` for the docs-only commit: it keeps the code
+   verdict (patch-id rule). Record the new head SHA. If `<dev-branch>` moved,
+   Dispatch runs `pr_ready` once at merge (verify-own-work **Check budget**).
 6. PR body follows umbrella `BUILD-STANDING.md` **PR briefing**. Status
    **Ready to merge**. Hand to Dispatch.
 

@@ -22,7 +22,9 @@ AC (layer 4)
   - [ ] <AC text> · PARTIAL | FAIL · what is left
 
 RUNGS
-  R0 static        PASS · `project.yml` `commands.pr_ready` → "pr-ready PASS … <tip sha>"
+  R0 static        worker: `commands.verify` PASS · packages: <touched packages>
+                   verifier: `commands.verify` PASS + `commands.pr_ready` → "pr-ready PASS … <tip sha>" at the verdict SHA
+                   merge: base unchanged | base moved → `commands.pr_ready` once on <new head sha>: PASS (hook skipped: yes/no)
                    check:governance: PASS | N/A (no governed files)
   R1 seam tests    PASS · <test files> · <n> tests · harness: <the Rule card harness summary line> | none (card names no harness)
   R2 integration   PASS | N/A (<reason>) · test DB: <name/branch, never production>

@@ -34,7 +34,7 @@ closed (`build-verifier` rule).
 
 | Rung | Run | PASS means |
 | --- | --- | --- |
-| **R0 static** | Rebase on `origin/<dev-branch>`, then `project.yml` `commands.pr_ready`. Add `project.yml` `commands.governance` when governed files changed. | The output's `commands.pr_ready_pass` line names the **current** <dev-branch> tip. Local script; no paid GitHub Actions. |
+| **R0 static** | Who runs what is the **Check budget** below. Worker: `project.yml` `commands.verify` for each touched package. Verifier: `commands.verify` + `commands.pr_ready` at the verdict SHA. Add `commands.governance` when governed files changed. | Worker: `verify` green. Verifier: the `commands.pr_ready_pass` line names the **current** <dev-branch> tip. Local scripts; no paid GitHub Actions. |
 | **R1 seam tests** | The changed seam's colocated test (create one if missing, per `/implement`), then the touched package's tests, then the harness the spec's **Rule card** names (v1 `/to-spec`). | Green. No mock of the module under test. No tautological test. The harness reports no new failing row and meets the card's bar; its summary line is in the receipt. |
 | **R2 backend integration** | `pnpm --dir backend test:integration` and the relevant `*.postgresOnly.test.ts` against a throwaway test database (for example an ephemeral database branch). Never production. | Green on a database built from current migrations. |
 | **R3 web smoke** | Expo web build (`<mobile-pkg>`, `web` script) + Playwright smoke flows through the shared verification CLI. Do not write a one-off script; extend the CLI. | Flows for the touched screens pass; screenshots attached. Native-only paths (GPS, BLE, HealthKit, Health Connect, watch) → N/A with the reason. |
@@ -66,6 +66,27 @@ self-merge tiers.
   Why: a kill says nothing about the code; read as red, it sends the worker to fix
   code that isn't broken.
 
+## Check budget per ticket
+
+A full type-check round is the expensive part. Each ticket gets about three, each
+with one owner (pstack `shipping.md` / `autopilot-full.md`):
+
+| Step | Runs | Not |
+| --- | --- | --- |
+| **Worker** | `commands.verify` for each touched package, plus its own tests, on the committed head | `commands.pr_ready`: that is the merge-time gate |
+| **Verifier** | `commands.verify` + `commands.pr_ready` at the verdict SHA, independent of the writer; records head SHA, base SHA, patch-id | |
+| **Merge** (Dispatch) | Base unchanged since the verdict → nothing new. Base moved → merge or rebase `<dev-branch>` in, run `commands.pr_ready` **once** on the new head (it is the CI for `<dev-branch>` PRs), then push with `commands.push_skip_hook` when the pre-push hook would re-run that identical check. Patch changed in code → back to the verifier (patch-id rule) | a second `pr_ready` from the hook |
+| **Batch** | Nothing per ticket or per merge. The consuming repo's scheduled heavy gate (`commands.scheduled_heavy_gate`) covers the merged tip; a red run goes to the `quality_area` coordinator | a combined check before merge |
+
+Why: the old path ran about six rounds per ticket (worker verify + pr_ready,
+verifier verify + pr_ready, conductor pr_ready + the hook re-running it). Half of
+them repeated a check that had just passed on the same patch. Three rounds keep the
+coverage, since each check has one owner and runs once, and cut the type-check load
+that filled the shared container on 2026-10-11.
+
+At fan-out `0` the coordinator is the verifier: it runs `commands.pr_ready` at the
+verdict SHA.
+
 ## Independent verdict
 
 The author runs the rungs and writes the receipt. The **verdict** comes from a
@@ -85,13 +106,15 @@ VERDICT  pass | fail · by <verifier agent> · head <sha> · base <dev-branch sh
 
 ### Verdict across a rebase (patch-id rule)
 
-After any rebase (docs last, Dispatch's merge-time rebase, a moved `<dev-branch>`),
-recompute the patch-id on the new head:
+After any merge or rebase of `<dev-branch>` into the PR (docs last, Dispatch's
+merge-time update), recompute the patch-id on the new head (the three-dot diff
+uses the merge base, so it works for either):
 
-- **Unchanged** → the verdict holds. Re-run R0 (`commands.pr_ready` on the new tip),
-  CI and the mergeability check only.
+- **Unchanged** → the verdict holds. Run `commands.pr_ready` once on the new head
+  (**Check budget**, Merge row) and check mergeability. Nothing else.
 - **Changed only in docs, tests or lint config** (for example the docs-last commit)
-  → the code verdict holds; R0, CI and mergeability run fresh on the new head.
+  → the code verdict holds; the same single `commands.pr_ready` run and
+  mergeability check on the new head.
 - **Changed in code** (a conflict was resolved, code was added) → the verifier
   re-verifies the rungs the change touches and writes a new VERDICT line.
 
@@ -120,8 +143,8 @@ that shares the worker's model shares its blind spots (pstack `orchestrate.md`).
 
 A FAIL goes back to the same ticket (`/implement` **Build loop**). Fix it, then
 re-run that rung and every rung after it, and the verifier writes a new VERDICT.
-After <dev-branch> moves, apply the patch-id rule: R0 runs again, plus the rungs
-the diff needs.
+After <dev-branch> moves, apply the patch-id rule and the **Check budget** Merge
+row: one `commands.pr_ready` on the new head, plus the rungs a changed patch needs.
 
 ## Receipt
 
