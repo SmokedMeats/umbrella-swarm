@@ -149,7 +149,7 @@ included Cursor usage (shared across the swarm). Gate:
 
 | Situation | Rule |
 | --- | --- |
-| **Start**, **Resume** that would spawn new coding agents, **spin-up** / **activate** an area, Monday **Rotate** into Active | **Refuse** when remaining included Cursor usage is under `caps.cloud_usage_floor` (default **5%**), or when a probe launch fails with usage used-up / on-demand required. Tell the founder: blocked, floor, on-demand (the host's usage settings), and the next included reset if known. Do not launch coordinators or cloud workers. |
+| **Start**, **Resume** that would spawn new coding agents, **spin-up** / **activate** an area, Monday **Rotate** into Active | **Refuse** when remaining included Cursor usage is under `caps.cloud_usage_floor` (default **10%**), or when a probe launch fails with usage used-up / on-demand required. Tell the founder: blocked, floor, on-demand (the host's usage settings), and the next included reset if known. Do not launch coordinators or cloud workers. |
 | Swarm already **Active** / work **in flight** | **Do not** pause or stop because usage dipped under the floor. Let running cloud agents finish. Coordinators may keep spawning until launches fail (continue through to **0%**). |
 | New cloud-agent **launch fails** mid-swarm (usage used up / rate limit) | **Park for usage** (below). Save progress on GitHub. Spawn nothing more. Do not thrash retries. |
 

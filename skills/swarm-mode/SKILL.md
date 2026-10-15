@@ -71,7 +71,7 @@ It runs the [/swarm](../swarm/SKILL.md) recipe and keeps area coordinators going
     cross-ticket breakage through.
 12. **Cursor usage Start gate (Cursor cloud runtime).** Do not Start, Resume-to-spawn, spin-up, or
     activate an area when remaining included Cursor usage is under
-    `caps.cloud_usage_floor` (default 5%) or a cloud-agent probe launch fails for
+    `caps.cloud_usage_floor` (default 10%) or a cloud-agent probe launch fails for
     usage. Already-running swarm work continues through to 0%; on spawn failure,
     park progress on swarm:state issues and let CoS auto-resume when usage recovers
     (see [/swarm](../swarm/SKILL.md) **Cursor cloud usage gate**).
