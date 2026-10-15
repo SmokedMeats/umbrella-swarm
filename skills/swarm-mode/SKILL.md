@@ -69,6 +69,14 @@ It runs the [/swarm](../swarm/SKILL.md) recipe and keeps area coordinators going
     merge** on the current `<dev-branch>` tip (`/swarm` **Merge path**).
     Why: pstack `shipping.md`; self-grading and batch checks on a stale tip let
     cross-ticket breakage through.
+12. **Cursor usage Start gate (Cursor cloud runtime).** Do not Start, Resume-to-spawn, spin-up, or
+    activate an area when remaining included Cursor usage is under
+    `caps.cloud_usage_floor` (default 5%) or a cloud-agent probe launch fails for
+    usage. Already-running swarm work continues through to 0%; on spawn failure,
+    park progress on swarm:state issues and let CoS auto-resume when usage recovers
+    (see [/swarm](../swarm/SKILL.md) **Cursor cloud usage gate**).
+    Why: near-empty budgets should not open new waves; unattended rate-limits must
+    not lose state in chat.
 
 ## Prerequisites: v1 installed alongside
 
