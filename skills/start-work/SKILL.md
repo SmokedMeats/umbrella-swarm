@@ -32,12 +32,12 @@ Owned by `roles.cos` (or whoever parents Start). Quiet on noop after a successfu
 2. **One owner.** If the chosen ticket already has `overflow:local` mid-build, or a live cloud agent / exclusive lease, do not dual-start. Status only; stop. (Grill sessions are founder-facing; they are not dual-started with a coding path on the same house.)
 3. **Probe Cursor included usage** the same way `/swarm` Start gate does (remaining included % and a cloud-agent launch probe). **Skip the usage probe when the picked outcome is a grill session** (no cloud/local coding route yet).
 4. **Route** (coding picks only)
-   - **Above `caps.cloud_usage_floor` (default 5%) and probe OK** → cloud path: `/swarm` Start/Resume for Active areas (Cursor cloud agents). Clear any stale `overflow:local` on tickets you are about to Start only if they are not mid-local.
+   - **At or above `caps.cloud_usage_floor` (default 10%) and probe OK** → cloud path: `/swarm` Start/Resume for Active areas (Cursor cloud agents). Clear any stale `overflow:local` on tickets you are about to Start only if they are not mid-local.
    - **Under floor or probe fails** → local path: same tickets under `/umbrella` on the local machine (Grok Build). Mark each claimed ticket `overflow:local` (and note on swarm:state if Active). Tell the founder briefly: parked cloud / running local. Never enable on-demand billing yourself.
 5. **In-flight rules**
    - Cloud already running may continue toward 0% until launches fail; on fail set `PARKED_CLOUD_USAGE` / `usage_parked` (keeps Active slot) with the swarm park brief (agent ids / PRs / tickets / leases / error).
    - Mid-local finishes local — do not yank to cloud mid-build when usage recovers.
-6. **On usage recovery** (the parent's existing usage probe, about every 2h): auto-resume swarm Starts for open tickets that are **not** mid-local; drop `overflow:local` only when reclaiming for cloud. Prefer cloud for **new** Starts once above floor.
+6. **On usage recovery** (the parent's existing usage probe, about every 2h): auto-resume swarm Starts for open tickets that are **not** mid-local; drop `overflow:local` only when reclaiming for cloud. Prefer cloud for **new** Starts once at or above floor.
 7. **Report** one short line: what was picked (ticket/area or grill session), path chosen (cloud|local|grill), and any still-parked or empty-queue items.
 
 ## Mid-stop progress notes (local = cloud shape)
