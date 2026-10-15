@@ -32,7 +32,9 @@ These are not work tickets. Nobody pulls them. Kanban hides `label:swarm:state`.
 0. **Prerequisites.** Probe for umbrella-skills and Matt's pack the way
    `/umbrella` §0 does (list in [/swarm-mode](../swarm-mode/SKILL.md) **Prerequisites**).
    Missing → stop and name the install. This recipe calls v1 skills by name; it
-   never copies them.
+   never copies them. Then, on Cursor cloud, run the **Cursor cloud usage gate**
+   (below): below `caps.cloud_usage_floor` or a failed usage probe → stop; do not
+   launch coordinators.
 1. Read `areas.yml`. Every open milestone already belongs to one area. Confirm with
    the founder which areas are **Active** (proposed: `areas.yml` `first_wave`; if unset,
    the top-ranked areas). Never run more than
@@ -139,6 +141,38 @@ brief, the worker pushes only its own ticket branch, the coordinator reads the r
 on a `send_later` check-in (`get_session`, `list_events`), and named skills must be
 readable in the sibling's checkout or environment. Each sibling is a full session:
 use them when the batch needs more workers than memory allows, not by default.
+
+## Cursor cloud usage gate
+
+On the Cursor cloud runtime (**Workers by runtime**), coding agents for Active areas are Cursor cloud agents. They draw on the founder's
+included Cursor usage (shared across the swarm). Gate:
+
+| Situation | Rule |
+| --- | --- |
+| **Start**, **Resume** that would spawn new coding agents, **spin-up** / **activate** an area, Monday **Rotate** into Active | **Refuse** when remaining included Cursor usage is under `caps.cloud_usage_floor` (default **5%**), or when a probe launch fails with usage used-up / on-demand required. Tell the founder: blocked, floor, on-demand (the host's usage settings), and the next included reset if known. Do not launch coordinators or cloud workers. |
+| Swarm already **Active** / work **in flight** | **Do not** pause or stop because usage dipped under the floor. Let running cloud agents finish. Coordinators may keep spawning until launches fail (continue through to **0%**). |
+| New cloud-agent **launch fails** mid-swarm (usage used up / rate limit) | **Park for usage** (below). Save progress on GitHub. Spawn nothing more. Do not thrash retries. |
+
+**Probe (parent, before every gated Start/Resume/spin-up/activate):**
+
+1. If a remaining-% is readable (dashboard or API): compare to `caps.cloud_usage_floor`.
+2. Else treat a no-op CloudAgent launch failure with "usage is used up" / "enable on-demand" as **0%** (below floor). List/get of existing agents still working does **not** clear the gate.
+3. Write `cloud_usage: ok | low | blocked` (+ `%` if known, `parked_at` if blocked) on the swarm state issue. **Status** always includes that line.
+
+### Park for usage (progress save — unattended OK)
+
+When a spawn fails for usage, or the parent decides to stop new spawns after a probe:
+
+1. **Per affected Active area** (same mechanics as **Pause**, but tag it usage):
+   - Coordinator lets running agents finish their current step; spawns nothing new.
+   - Rewrite the area brief: `PARKED_CLOUD_USAGE` · timestamp · in flight (agent ids / PRs / tickets) · next tickets · leases held · last successful spawn · the exact launch error.
+   - Append one comment on the findings buffer with the same facts (append-only).
+   - On the swarm state issue: set `usage_parked: true` for that area (keeps its Active slot; not a Parked rotation). Leases stay listed.
+2. **Parent:** one founder ping the first time usage blocks in a calendar day; otherwise stay quiet. Do not ask the founder to babysit.
+3. **Dispatch:** keep the merge queue for already-Ready PRs; do not expect new cloud-built Ready cards until usage clears.
+4. **CoS resume loop:** on a weekday probe cadence (see standing / routine), re-run the probe. Quiet while still blocked. When usage is at or above the floor (or a probe launch succeeds), clear `usage_parked`, clear `PARKED_CLOUD_USAGE` on briefs, and **Resume** those Active areas without waiting for the founder — then one short ping: cloud usage recovered, N areas resumed.
+
+Why: Start must not burn a near-empty budget; in-flight work should drain to zero; cold restarts read GitHub (`/recall`), so progress must live on swarm:state issues, not chat.
 
 ## Resume
 

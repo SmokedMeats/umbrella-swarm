@@ -87,6 +87,15 @@ Drafted milestone goals: `docs/milestone-goals.md`.
 
 Default cadence is hourly (`caps.cycle`). One cycle:
 
+### 0. Gate (when `commands.crawl_tick_gate` is set)
+
+Run the gate for your area first (`commands.crawl_tick_gate` with `--area <you>`). It only reads: your area's issues and PRs (labelled `area:<you>`, or in a milestone whose description says `Area: <you>`; open or closed), the <dev-branch> tip, and the cursor commit.
+
+- **`UNCHANGED`:** still check every worker in flight (any runtime) and the swarm state issue (step 2's last two bullets). Run the full cycle anyway when a worker finished or failed, a ticket is queued from your last cycle, a lease you asked for was granted, your tier changed, or you were just paused (step 2's Paused line). Otherwise re-arm the check-in while any worker is working, skip steps 1, 3, 4, 5 and the cycle comment, and stop.
+- **Any other line, or a non-zero exit:** run the full cycle. After it finishes cleanly, run `commands.crawl_tick_gate_save` with `--area <you>`. Skip the save if the cycle failed, so the next cycle runs in full.
+
+A baseline older than 3h prints `CHANGED: stale`, so a quiet area still gets a full cycle at least every 3 hours. Why: wake on what moved in your area, with a long heartbeat behind it (pstack), not a full recall every hour.
+
 ### 1. Recall
 
 Run [/recall](../recall/SKILL.md) on your brief issue. Output: a short resume note
@@ -105,6 +114,9 @@ GitHub wins over the brief.
 - The swarm state issue: are you paused? Your merge tier? Your leases?
 
 Paused → rewrite the brief, post a cycle comment, stop.
+`usage_parked` on the swarm state issue (or brief `PARKED_CLOUD_USAGE`) → same as
+Paused for spawning: finish in-flight only, rewrite brief, cycle comment, stop.
+Do not clear usage park yourself; the parent clears it on probe recovery.
 
 ### 3. Plan
 
@@ -134,7 +146,12 @@ Paused → rewrite the brief, post a cycle comment, stop.
   `caps.coding_subagents_total` across the swarm. Both count every worker on any
   runtime (`/swarm` **Workers by runtime**). Refill them as a rolling window (v1
   DELEGATION **Child shape by runtime**, **Cap**).
-  On a rate limit, spawn nothing more this cycle and note it in the brief.
+  On a rate limit, spawn nothing more this cycle and note it in the brief. On a
+  Cursor usage used-up error, also do not thrash retries; follow **Park for usage** in
+  [/swarm](../swarm/SKILL.md): rewrite the brief with `PARKED_CLOUD_USAGE` (in flight,
+  next, leases, exact error), append the findings buffer, and ESCALATE once to the
+  parent so the swarm state issue gets `usage_parked: true`. Running workers keep
+  going; the parent auto-resumes when usage recovers.
 - **Shared helpers first.** Before workers start, list the shared helpers that
   already exist for this batch's kind of change (a retry helper, a fetch wrapper, a
   test fixture) and put them in every worker brief with "use these; don't add new
@@ -197,6 +214,7 @@ FORBIDDEN     leased files you don't hold; migrations without the parent's go;
 A ticket with sub-issues stays one agent unless the sub-issues touch disjoint files.
 Fresh child by default. Respawn a child once if its receipt misses a required
 field. A second miss is a gap.
+**Repeat failure.** A worker back with `needs_parent` after the same check failed twice: you are the parent in `/implement` **Build loop** **Repeat failure**.
 Brief opening order: standing rules, then the rule card; ticket / files / findings last so briefs within the hour share a cached prefix.
 
 ### 5. Review each returned PR
