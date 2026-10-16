@@ -18,7 +18,7 @@ This pack is a layer on umbrella-skills (v1). It calls v1 skills by name and cop
 - Only swarm-level rules live here: areas, coordinators, Dispatch tiers, per-area and total worker caps, docs last, verifier fan-out.
 - `project.example.yml` is the same file in both packs. Change it in umbrella-skills first, then copy it here byte for byte. Swarm-only settings go in `areas.example.yml`.
 
-Everything an installed agent must read lives under `skills/` (sync copies only `skills/*`): the skill map is `skills/swarm/SKILL-MAP.md`, the templates are `skills/swarm/templates/`. Link to them from skills with relative paths; never from a skill to `README.md` or `docs/`.
+Everything an installed agent must read lives under `skills/` (sync copies only `skills/*`): the skill map is `skills/swarmy/SKILL-MAP.md`, the templates are `skills/swarmy/templates/`. Link to them from skills with relative paths; never from a skill to `README.md` or `docs/`.
 
 When one issue changes both packs (an umbrella-skills issue with a swarm companion), land the v1 part first, then point the swarm skills at it.
 

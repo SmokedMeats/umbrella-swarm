@@ -38,7 +38,7 @@ Install in this order. Later packs call earlier ones by name.
 | 2 | [SmokedMeats/umbrella-skills](https://github.com/SmokedMeats/umbrella-skills) | `/umbrella`, `/triage`, `/code-review`, the verifiers, and the house rules this pack drives |
 | 3 | [SmokedMeats/umbrella-swarm](https://github.com/SmokedMeats/umbrella-swarm) (this repo) | Swarm mode on top of the two above |
 
-`/swarm` **Start** checks that packs 1, 1b and 2 are installed, the same way `/umbrella` does. If one is missing, it stops and tells you what to install.
+`/swarmy` **Start** checks that packs 1, 1b and 2 are installed, the same way `/umbrella` does. If one is missing, it stops and tells you what to install.
 
 Why by name, not copied: this pack's skills say "run `/implement`", they don't restate `/implement`'s rules, so there is one copy of each rule and the swarm follows when umbrella-skills changes. That is about the *text of the rules*. Real files still get copied on install: the sync script writes each pack into every agent's skills folder and into your product repos, and the private umbrella-skills clone keeps pinned backups of Matt's pack, SimpleEnglish, and pstack in `vendor/` so an outside repo going away never breaks an install (umbrella-skills README **Where skills live**).
 
@@ -60,19 +60,19 @@ node scripts/sync-workspace.mjs
 
 When a sibling `umbrella-swarm` folder exists, `sync-workspace.mjs` copies its `skills/*` into the same skill roots as umbrella-skills: `~/.grok`, `~/.cursor`, `~/.claude`, `~/.agents`, `~/.copilot` (VS Code reads the last three), each product repo's `workspace.skill_targets` folders, and `--box` / `--dest` roots. Commit those product-repo folders so cloud agents see them, and re-run sync after a pack changes; never edit the installed copies. Use `--no-swarm` to skip the swarm pack. Details: the umbrella-skills README, **Install**.
 
-Then say `/swarm-mode` (or "start the swarm") in your agent.
+Then say `/swarmy-mode` (or "start the swarm") in your agent.
 
 ## What's in it
 
 | Path | What |
 | --- | --- |
 | [docs/PLAN.md](docs/PLAN.md) | What a swarm plan must cover: cap, areas, goals, handoffs, verification, collisions, rotation. Read this first. |
-| [skills/swarm-mode](skills/swarm-mode/SKILL.md) | Sticky front door, like `umbrella-mode`. The Chief of Staff is the parent agent. |
-| [skills/swarm](skills/swarm/SKILL.md) | The conductor: start, resume, pause, status, rotate, routing, file leases, merge path. |
+| [skills/swarmy-mode](skills/swarmy-mode/SKILL.md) | Sticky front door, like `umbrella-mode`. The Chief of Staff is the parent agent. |
+| [skills/swarmy](skills/swarmy/SKILL.md) | The conductor: start, resume, pause, status, rotate, routing, file leases, merge path. |
 | [skills/area-coordinator](skills/area-coordinator/SKILL.md) | What a coordinator does each cycle, house by house. |
 | [skills/verify-own-work](skills/verify-own-work/SKILL.md) | The verification ladder (rungs R0–R7) and the receipt. |
 | [skills/recall](skills/recall/SKILL.md) | Rebuilds context from GitHub and transcripts after a restart. |
-| [skills/swarm/templates/](skills/swarm/templates/) | Coordinator brief, findings buffer, receipt, and goal-line templates. |
+| [skills/swarmy/templates/](skills/swarmy/templates/) | Coordinator brief, findings buffer, receipt, and goal-line templates. |
 | [areas.example.yml](areas.example.yml) | Example area map. Copy to `areas.yml` in your private config. |
 | [project.example.yml](project.example.yml) | Project settings (repo, branches, boards, `limits`). The same file as umbrella-skills'; change it there first. |
 | [MAINTAINING.md](MAINTAINING.md) | For maintainers: private vs public snapshot, `scripts/publish-public.sh`, and the one-copy rule with umbrella-skills. |
@@ -95,7 +95,7 @@ Only a few areas are Active at a time (the example uses 5; typical range 4–6).
 
 Raise the cap only when receipts are trusted, review stays light, there are no rate-limit stalls or cross-area conflicts, and reverts are rare. The rules live in [PLAN.md](docs/PLAN.md) and `caps` in your `areas.yml`.
 
-Where workers run matters too. On Cursor cloud each worker gets its own VM. On Claude Code, subagents share the coordinator's container, so a coordinator checks free memory before each spawn and sends the overflow to sibling cloud sessions; heavy checks (type check, `pr_ready`) go through umbrella-skills' slotted `heavy` gate, one per container, and tests stay narrow: only the touched files and their direct callers. Each ticket gets about three full type-check rounds: the worker's package `verify`, the verifier's `verify` + `pr_ready`, and one `pr_ready` at merge only if the base moved (verify-own-work **Check budget per ticket**). The worker caps count every worker on any runtime. Details: `/swarm` **Workers by runtime**.
+Where workers run matters too. On Cursor cloud each worker gets its own VM. On Claude Code, subagents share the coordinator's container, so a coordinator checks free memory before each spawn and sends the overflow to sibling cloud sessions; heavy checks (type check, `pr_ready`) go through umbrella-skills' slotted `heavy` gate, one per container, and tests stay narrow: only the touched files and their direct callers. Each ticket gets about three full type-check rounds: the worker's package `verify`, the verifier's `verify` + `pr_ready`, and one `pr_ready` at merge only if the base moved (verify-own-work **Check budget per ticket**). The worker caps count every worker on any runtime. Details: `/swarmy` **Workers by runtime**.
 
 ## Every goal has a why
 
@@ -135,7 +135,7 @@ The umbrella-skills README, **Project config**, explains the private config layo
 
 ## Skill map
 
-[skills/swarm/SKILL-MAP.md](skills/swarm/SKILL-MAP.md): every skill the swarm uses (this pack, umbrella-skills, Matt's pack, SimpleEnglish), who runs it, and when. It ships inside the `swarm` skill so installed agents can read it.
+[skills/swarmy/SKILL-MAP.md](skills/swarmy/SKILL-MAP.md): every skill the swarm uses (this pack, umbrella-skills, Matt's pack, SimpleEnglish), who runs it, and when. It ships inside the `swarmy` skill so installed agents can read it.
 
 ## Before pushing
 

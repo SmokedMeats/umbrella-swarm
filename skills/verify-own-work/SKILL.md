@@ -103,7 +103,7 @@ The author runs the rungs and writes the receipt. The **verdict** comes from a
 different agent, one per ticket, that didn't write it (the coordinator, for a
 fan-out `0` ticket). Green CI or a bot review is
 not a verdict. Verify each ticket on its own; there is no combined check across
-tickets (cross-ticket breakage is caught at merge, `/swarm` **Merge path**).
+tickets (cross-ticket breakage is caught at merge, `/swarmy` **Merge path**).
 Why: pstack `shipping.md`; a writer grading itself passes what it misread.
 
 The verifier records one line in the receipt, with the same fields as the
@@ -151,7 +151,7 @@ row: one `commands.pr_ready` on the new head, plus the rungs a changed patch nee
 
 ## Receipt
 
-Use [verification-receipt.md](../swarm/templates/verification-receipt.md). Paste it
+Use [verification-receipt.md](../swarmy/templates/verification-receipt.md). Paste it
 under `## Verification` in the PR body (umbrella `BUILD-STANDING.md` **PR briefing**).
 Dispatch refuses a PR whose receipt lacks a rung its area lists or a VERDICT line.
 

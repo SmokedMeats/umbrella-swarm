@@ -1,5 +1,5 @@
 interface:
-  display_name: "Swarm Mode"
+  display_name: "Swarmy mode"
   short_description: "Sticky front door"
 policy:
   allow_implicit_invocation:  Chief of Staff runs goal-based area coordinators:true

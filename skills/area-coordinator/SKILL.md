@@ -4,7 +4,7 @@ description: >
   What an area coordinator ("chief of staff" for one goal) does each cycle: recall
   its brief, re-detect from GitHub, plan non-overlapping tickets, spawn coding
   workers (shape picked by runtime), gather verification receipts, hand ready PRs
-  to Dispatch, set lanes after merge, and write the brief back. Use when launched by /swarm with an area packet.
+  to Dispatch, set lanes after merge, and write the brief back. Use when launched by /swarmy with an area packet.
   Delegates; never writes product code. Runs umbrella-skills and Matt's skills
   by name through its own subagents (both must be installed alongside).
 disable-model-invocation: true
@@ -16,7 +16,7 @@ Bindings: `project.yml` keys, `<dev-branch>`-style placeholders, `areas.yml`, an
 
 You own one **goal** (your area: layer 1 of four: area > milestone > house > ticket). You do not write product code. You keep the task
 list, spawn agents, check their work, and keep the brief honest. Your packet comes
-from [/swarm](../swarm/SKILL.md). Do not read `umbrella/SKILL.md`.
+from [/swarmy](../swarmy/SKILL.md). Do not read `umbrella/SKILL.md`.
 
 Your area has a **Why it matters** line. Use it to break ties: pick the work that
 serves the why, not just the work that is easiest to finish.
@@ -54,7 +54,7 @@ the installed v1 file.
 Missing a pack → ESCALATE to the parent. Do not paste a v1 skill into a packet; name
 it. Exception: a cloud or sibling worker that cannot read installed skills gets the
 named *sections* pasted (umbrella `DELEGATION.md` **Sibling contract**).
-Full map: [SKILL-MAP.md](../swarm/SKILL-MAP.md).
+Full map: [SKILL-MAP.md](../swarmy/SKILL-MAP.md).
 
 ## When to create and retire
 
@@ -127,7 +127,7 @@ Do not clear usage park yourself; the parent clears it on probe recovery.
   unhoused), goes back to Board
   (`/triage`) or `/to-tickets`. Do not invent ACs or goal lines.
 - **Work house by house.** Each house has its own goal line
-  ([house-goal.md](../swarm/templates/house-goal.md)) with a numeric done-check. Pick
+  ([house-goal.md](../swarmy/templates/house-goal.md)) with a numeric done-check. Pick
   the house that moves its milestone goal (and so your area goal) most. Stay on it
   until its done-check passes, write the proof in the brief, then pick the next.
   Run a second house at once only if its files don't overlap and a coding slot is
@@ -144,11 +144,11 @@ Do not clear usage park yourself; the parent clears it on probe recovery.
   investigation (`/diagnosing-bugs`), not one agent each.
 - **Cap:** at most `caps.coding_subagents_per_area` coding workers, and never past
   `caps.coding_subagents_total` across the swarm. Both count every worker on any
-  runtime (`/swarm` **Workers by runtime**). Refill them as a rolling window (v1
+  runtime (`/swarmy` **Workers by runtime**). Refill them as a rolling window (v1
   DELEGATION **Child shape by runtime**, **Cap**).
   On a rate limit, spawn nothing more this cycle and note it in the brief. On a
   Cursor usage used-up error, also do not thrash retries; follow **Park for usage** in
-  [/swarm](../swarm/SKILL.md): rewrite the brief with `PARKED_CLOUD_USAGE` (in flight,
+  [/swarmy](../swarmy/SKILL.md): rewrite the brief with `PARKED_CLOUD_USAGE` (in flight,
   next, leases, exact error), append the findings buffer, and ESCALATE once to the
   parent so the swarm state issue gets `usage_parked: true`. Running workers keep
   going; the parent auto-resumes when usage recovers.
@@ -168,7 +168,7 @@ Do not clear usage park yourself; the parent clears it on probe recovery.
 One worker per ticket. Ship mode PR is forced for every worker: one ticket, one
 branch, one PR into `<dev-branch>`.
 
-**Pick the worker's shape by runtime** (`/swarm` **Workers by runtime**):
+**Pick the worker's shape by runtime** (`/swarmy` **Workers by runtime**):
 
 - Cursor cloud → a cloud agent. The caps are the only limit.
 - Claude Code → before **each** in-process spawn, run v1's memory check
@@ -183,6 +183,25 @@ branch, one PR into `<dev-branch>`.
   `get_session` / `list_events`. It can't message you back; you hear only if a turn
   fails.
 
+**Model tier.** Every packet you send (worker, verifier, review, search) carries
+`MODEL_TIER` with the umbrella `DELEGATION.md` **MODEL_TIER** role defaults:
+
+| Child | Tier |
+| --- | --- |
+| Coding worker | standard |
+| Verifier (`build-verifier`, `verifier_fanout` slots) | standard |
+| `/code-review`, the repeat-failure reviewer | deep |
+| Search / investigate (`/how`, `/why`, file discovery) | fast |
+
+A locked area (`standing-product-rules.md`) never gets a tier below its role
+default; raise it if in doubt. Pass the mapped `models.<runtime>.<tier>` from
+`project.yml` per runtime (umbrella-mode **Task / bot dispatch rules** step 3a:
+Claude `Agent` `model`; Cursor Task `model` / `.cursor/agents` `model:` /
+`/v1/agents` `model.id`; Grok Build `[subagents.models]` / `spawn_subagent` `model`).
+Unset row or a runtime that can't pick → pass nothing; the child inherits. The
+receipt names the model it ran on. Tiers change only which model a slot runs on:
+`coding_subagents_per_area`, `coding_subagents_total` and `verifier_fanout` stay as they are.
+
 Use the implement-ticket packet from `umbrella/DELEGATION.md` and the `/implement`
 **Child rules**, plus:
 
@@ -192,6 +211,7 @@ HOUSE_GOAL    the house goal line with its done-check   ← layer 3; keep it in 
 SKILLS        by name: /implement child rules (v1), /tdd (Matt) [+ /prototype, /codebase-design as needed]
 TICKET        # + URL + So that line + ACs (+ sub-issues)
 SHAPE         cursor-cloud | in-process | sibling-session · BRANCH <the only branch you push>
+MODEL_TIER    standard (worker default; never lower for a locked area) · MODEL <mapped id, or inherit>
 PR_RULES      Mode B solo: this agent owns its branch; push only that branch;
               never push <dev-branch>, Preview, master, or another worker's branch; never merge
 SHARED_HELPERS  <existing helpers for this kind of change: path · what it does>. Use these.
@@ -238,7 +258,7 @@ Brief opening order: standing rules, then the rule card; ticket / files / findin
    spot-check the receipt yourself; see verify-own-work **Fan-out**). It gives the
    verdict and records the VERDICT line (`HEAD_SHA`, `BASE_SHA`, `PATCH_ID`, `DEPTH`). Green CI or
    a bot review is not a verdict. No combined check across tickets; cross-ticket
-   breakage is caught at merge (`/swarm` **Merge path**).
+   breakage is caught at merge (`/swarmy` **Merge path**).
    Why: pstack `shipping.md`; the writer can't see what it misread.
 3. `build-verifier` PASS at that depth, and the ticket's `/code-review` (with
    `/blast-radius`) has no in-scope findings. Findings go back to the same ticket (`/implement` **Build loop**).
@@ -269,7 +289,7 @@ Brief opening order: standing rules, then the rule card; ticket / files / findin
 
 ### 7. Write back
 
-- Rewrite the brief issue body ([coordinator-brief.md](../swarm/templates/coordinator-brief.md)).
+- Rewrite the brief issue body ([coordinator-brief.md](../swarmy/templates/coordinator-brief.md)).
 - Append findings that are not this cycle's work to the findings buffer. Don't
   fix them now.
 - Log corrections: a second correction of the same kind → `/correct` (lint
@@ -295,6 +315,7 @@ NEXT       first thing next cycle
 - Write `project.yml` `paths.umbrella_cursor`. Your state is the brief issue.
 - Create an area, milestone, house or ticket without goal + why + done-check
   (a ticket: `So that` + ACs). Create an area or milestone without the founder's approval.
+- Send a packet below its role's `MODEL_TIER`, or change the caps.
 - Pull a ticket from another area (Active, Next or Parked). If it belongs to your
   goal, ask the parent to move its milestone into your area first.
 

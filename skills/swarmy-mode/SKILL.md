@@ -1,8 +1,8 @@
 ---
-name: swarm-mode
+name: swarmy-mode
 description: >
   Sticky front door for running the product as a few goal-based area coordinators
-  instead of one house at a time. Use for /swarm-mode, when the founder asks to start,
+  instead of one house at a time. Use for /swarmy-mode, when the founder asks to start,
   resume, pause, or check the swarm, or when work belongs to an active area in
   areas.yml. The parent (Chief of Staff) owns founder gates, grills, the area
   roster, leases, and merge tiers; area coordinators run /area-coordinator.
@@ -17,7 +17,7 @@ disable-model-invocation: false
 Bindings: `project.yml` keys, `<dev-branch>`-style placeholders, `areas.yml`, and `standing-product-rules.md` resolve per umbrella-skills [PROJECT-CONFIG.md](../umbrella/PROJECT-CONFIG.md). `areas.yml` and the goal docs live in the private overlay and sync to `docs/swarm/` in the primary product repo (template: `areas.example.yml` in this pack).
 
 The parent in this mode is **Chief of Staff**. It talks to the founder. It does not code.
-It runs the [/swarm](../swarm/SKILL.md) recipe and keeps area coordinators going.
+It runs the [/swarmy](../swarmy/SKILL.md) recipe and keeps area coordinators going.
 
 ## Non-negotiables
 
@@ -49,10 +49,10 @@ It runs the [/swarm](../swarm/SKILL.md) recipe and keeps area coordinators going
 9. **Nothing is created without its goal.** No area, milestone, house or ticket
    without goal + why + done-check (a ticket: `So that` + ACs). The founder approves new
    areas and milestones; coordinators create houses and tickets; anything retires
-   when its done-check passes. Board enforces this at triage. See `/swarm`
+   when its done-check passes. Board enforces this at triage. See `/swarmy`
    **When to create and retire**.
    Why: an item without a done-check can't be finished, verified or retired.
-10. **Worker shape follows the runtime.** Full rules: `/swarm` **Workers by runtime**.
+10. **Worker shape follows the runtime.** Full rules: `/swarmy` **Workers by runtime**.
 
     | Runtime | Worker | Isolation | Scale by |
     | --- | --- | --- | --- |
@@ -66,7 +66,7 @@ It runs the [/swarm](../swarm/SKILL.md) recipe and keeps area coordinators going
     Why: 12 in-process workers in one 15 GB container hit 7 OOM kills and shipped no
     PR in an hour (2026-10-11); Cursor workers each have their own VM.
 11. **Each ticket is verified by an agent that didn't write it, and rechecked at
-    merge** on the current `<dev-branch>` tip (`/swarm` **Merge path**).
+    merge** on the current `<dev-branch>` tip (`/swarmy` **Merge path**).
     Why: pstack `shipping.md`; self-grading and batch checks on a stale tip let
     cross-ticket breakage through.
 12. **Cursor usage Start gate (Cursor cloud runtime).** Do not Start, Resume-to-spawn, spin-up, or
@@ -74,7 +74,7 @@ It runs the [/swarm](../swarm/SKILL.md) recipe and keeps area coordinators going
     `caps.cloud_usage_floor` (default 10%) or a cloud-agent probe launch fails for
     usage. Already-running swarm work continues through to 0%; on spawn failure,
     park progress on swarm:state issues and let CoS auto-resume when usage recovers
-    (see [/swarm](../swarm/SKILL.md) **Cursor cloud usage gate**).
+    (see [/swarmy](../swarmy/SKILL.md) **Cursor cloud usage gate**).
     Why: near-empty budgets should not open new waves; unattended rate-limits must
     not lose state in chat.
 
@@ -104,7 +104,7 @@ Missing pack → stop and name the install, the same as `/umbrella` §0. Do not 
 a v1 skill's text into this pack. If v1 changes, umbrella-swarm follows.
 Why: one copy of each rule. Two copies drift.
 
-Who runs each skill in the swarm, and when, is the [Skill map](../swarm/SKILL-MAP.md)
+Who runs each skill in the swarm, and when, is the [Skill map](../swarmy/SKILL-MAP.md)
 (`swarm/SKILL-MAP.md`). No v1 skill is dropped. Anything without a swarm
 home (`/teach`, `/teach-me`, `/ask-matt`) stays available through the parent or
 `/umbrella`.
@@ -122,7 +122,7 @@ finishable) > ticket. Each agent reads the layer above it.
 | Ticket | `So that: <house goal>` (or milestone goal if unhoused) + link (its why) + `## Acceptance criteria` | Verifiers |
 
 A house (`umbrella:<house>`) has its own focused goal, narrower than its milestone
-([house-goal.md](../swarm/templates/house-goal.md)). Coordinators work house by house
+([house-goal.md](../swarmy/templates/house-goal.md)). Coordinators work house by house
 and use the house done-check to know they're finished and to pick the next. One
 house = one milestone = one area. No fifth layer: sub-issues split a ticket.
 Why: a milestone is too big to steer by every cycle; a house check can be answered
@@ -132,12 +132,12 @@ each cycle.
 
 | the founder says | Do |
 | --- | --- |
-| "start the swarm" / `/swarm-mode` | `/swarm` **Start** |
-| "resume" / a new session | `/swarm` **Resume** |
-| "pause <area>" / "pause everything" | `/swarm` **Pause** |
-| "status" | `/swarm` **Status**: one line per area, then anything waiting on the founder |
+| "start the swarm" / `/swarmy-mode` | `/swarmy` **Start** |
+| "resume" / a new session | `/swarmy` **Resume** |
+| "pause <area>" / "pause everything" | `/swarmy` **Pause** |
+| "status" | `/swarmy` **Status**: one line per area, then anything waiting on the founder |
 | "work on <house>" for a house in a Next or Parked area | `/umbrella` (classic, v1), parent stays Chief of Staff |
-| "rotate" / "activate <area>" / "park <area>" | `/swarm` **Rotate** |
+| "rotate" / "activate <area>" / "park <area>" | `/swarmy` **Rotate** |
 | "raise the cap" / "lower the cap" | Check `raise_rule` in `areas.yml`, report the numbers, change it only if the founder confirms |
 | "use as many agents as needed" | Raise the worker caps for this batch. Never the memory check: past it, Claude Code workers become sibling sessions or queue |
 | "opt <area> into Tier 1" | Write it on the swarm state issue. Dispatch enforces it. |

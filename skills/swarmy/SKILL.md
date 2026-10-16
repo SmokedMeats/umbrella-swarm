@@ -1,9 +1,9 @@
 ---
-name: swarm
+name: swarmy
 description: >
   Conductor recipe for the product swarm: start, resume, pause, or check status;
   spin up, pause, or retire area coordinators; grant leases; route tickets by area;
-  run the merge path with Dispatch. Use under /swarm-mode, or when the founder asks to
+  run the merge path with Dispatch. Use under /swarmy-mode, or when the founder asks to
   start or resume the swarm. Reuses /triage, /grilling, /to-spec, /to-tickets,
   /implement, /code-review and /correct from umbrella-skills by name (v1 and
   Matt's pack must be installed alongside).
@@ -14,7 +14,7 @@ argument-hint: "start | resume | pause [area] | status | rotate | spin-up <area>
 
 Bindings: `project.yml` keys, `<dev-branch>`-style placeholders, `areas.yml`, and `standing-product-rules.md` resolve per umbrella-skills [PROJECT-CONFIG.md](../umbrella/PROJECT-CONFIG.md). `areas.yml` and the goal docs live in the private overlay and sync to `docs/swarm/` in the primary product repo (template: `areas.example.yml` in this pack).
 
-Run by **Chief of Staff** under [/swarm-mode](../swarm-mode/SKILL.md). Config is
+Run by **Chief of Staff** under [/swarmy-mode](../swarmy-mode/SKILL.md). Config is
 `areas.yml` (private overlay → `docs/swarm/areas.yml` in the primary repo), mirrored on GitHub. Live state is three kinds of GitHub
 issue, all labeled `swarm:state`, on milestone **Continuous**, on the configured Project with Status
 **In Progress**:
@@ -30,7 +30,7 @@ These are not work tickets. Nobody pulls them. Kanban hides `label:swarm:state`.
 ## Start
 
 0. **Prerequisites.** Probe for umbrella-skills and Matt's pack the way
-   `/umbrella` §0 does (list in [/swarm-mode](../swarm-mode/SKILL.md) **Prerequisites**).
+   `/umbrella` §0 does (list in [/swarmy-mode](../swarmy-mode/SKILL.md) **Prerequisites**).
    Missing → stop and name the install. This recipe calls v1 skills by name; it
    never copies them. Then, on Cursor cloud, run the **Cursor cloud usage gate**
    (below): below `caps.cloud_usage_floor` or a failed usage probe → stop; do not
@@ -85,14 +85,14 @@ V1_SKILLS     by name from umbrella-skills: /wayfinder /to-spec /to-tickets /imp
 COMPANIONS    v1 umbrella/DELEGATION.md, umbrella/BUILD-STANDING.md, umbrella/CONVENTIONS.md,
               umbrella/PRE-GRILL.md, umbrella/PROJECTS.md, umbrella/DEVICE-QA.md,
               umbrella/PROJECT-CONFIG.md; umbrella-swarm skills/verify-own-work/SKILL.md,
-              skills/recall/SKILL.md, skills/swarm/SKILL-MAP.md
+              skills/recall/SKILL.md, skills/swarmy/SKILL-MAP.md
 FORBIDDEN     umbrella/SKILL.md; running a grill with the founder; merge outside MERGE_TIER;
               master/Preview/OTA/migrate; editing another area's leased file; triage labels
 STANDING      by path: swarm-mode/SKILL.md **Standing rules this mode keeps** (paste only for a
               coordinator that cannot read installed skills)
 ```
 
-**Brief opening order.** Standing rules, then the rule card; the changing part (ticket, files, findings) last so briefs within the hour share a cached prefix (same rule as `/swarm-mode` **Standing rules**).
+**Brief opening order.** Standing rules, then the rule card; the changing part (ticket, files, findings) last so briefs within the hour share a cached prefix (same rule as `/swarmy-mode` **Standing rules**).
 
 Where a coordinator runs is a hosting choice: a Cursor Project (cloud coordinator
 with its own computer), a Claude Code cloud session, or a durable Grok bot lane. All
@@ -149,7 +149,7 @@ included Cursor usage (shared across the swarm). Gate:
 
 | Situation | Rule |
 | --- | --- |
-| **Start**, **Resume** that would spawn new coding agents, **spin-up** / **activate** an area, Monday **Rotate** into Active | **Refuse** when remaining included Cursor usage is under `caps.cloud_usage_floor` (default **10%**), or when a probe launch fails with usage used-up / on-demand required. Tell the founder: blocked, floor, on-demand (the host's usage settings), and the next included reset if known. Do not launch coordinators or cloud workers. |
+| **Start**, **Resume** that would spawn new coding agents, **spin-up** / **activate** an area, Monday **Rotate** into Active | **Refuse** when remaining included Cursor usage is under `caps.cloud_usage_floor` (default **10%**), or when a probe launch fails with usage used-up / on-demand required. Tell the founder: blocked, floor, [on-demand](grokbot://app/v1/settings?id=on-demand), and the next included reset if known. Do not launch coordinators or cloud workers. |
 | Swarm already **Active** / work **in flight** | **Do not** pause or stop because usage dipped under the floor. Let running cloud agents finish. Coordinators may keep spawning until launches fail (continue through to **0%**). |
 | New cloud-agent **launch fails** mid-swarm (usage used up / rate limit) | **Park for usage** (below). Save progress on GitHub. Spawn nothing more. Do not thrash retries. |
 

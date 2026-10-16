@@ -8,8 +8,8 @@ A worker that cannot read installed skills (a cloud or sibling session whose che
 
 | Skill | Who runs it | When |
 | --- | --- | --- |
-| `/swarm-mode` | Chief of Staff (parent) | Sticky swarm front door |
-| `/swarm` | Chief of Staff | Start, resume, pause, status, rotate, routing, leases, merge path |
+| `/swarmy-mode` | Chief of Staff (parent) | Sticky swarm front door |
+| `/swarmy` | Chief of Staff | Start, resume, pause, status, rotate, routing, leases, merge path |
 | `/area-coordinator` | One coordinator per Active area | Each cycle, house by house |
 | `verify-own-work` | Worker, then its verifier | Before a PR goes to Dispatch |
 | `/recall` | Chief of Staff, coordinator | Cold restart; rebuild state from GitHub |

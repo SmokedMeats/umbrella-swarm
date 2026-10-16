@@ -6,7 +6,7 @@ rollout for a named app) lives in the private overlay repo, not here.
 This public pack keeps:
 
 - Skills: `swarm-mode`, `swarm`, `area-coordinator`, `verify-own-work`, `recall`
-- Templates under `skills/swarm/templates/` (inside a skill folder, so sync installs them with the skills)
+- Templates under `skills/swarmy/templates/` (inside a skill folder, so sync installs them with the skills)
 - `areas.example.yml` and `project.example.yml`
 
 ## What a plan must cover
