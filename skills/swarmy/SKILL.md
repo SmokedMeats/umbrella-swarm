@@ -45,8 +45,12 @@ These are not work tickets. Nobody pulls them. Kanban hides `label:swarm:state`.
    mean more hot-file collisions. Lauren runs more than 10 only after her environment
    and verification were in place.
 2. **Records first.** Every open ticket in those areas' milestones has a milestone,
-   a Project Status (see `project.yml`), and an `area:<slug>` label. If not, hand the list to Board
-   (`/triage`). Do not label them yourself; triage stays on Board.
+   a Project Status (see `project.yml`), and an `area:<slug>` label. If a housed ticket
+   is missing those, hand it to Board (`/triage`). Do not label them yourself; triage
+   stays on Board. An unassigned **Unclaimed** card whose only gap is native
+   parent/sub-issues, blocked-by, Project membership, or fitted Pipeline ticks is not
+   that list: repair the graph and leave it unassigned. Area Active / Next / Parked
+   is the roster, not Project Status **Parked**.
 3. **Layered goals.** Each area milestone's description starts with its goal line
    ([milestone-goal.md](templates/milestone-goal.md)):
    `Ships <X>; done when <user-visible check with real numbers>. Why: <reason>. Area: <slug>.`
@@ -62,7 +66,8 @@ These are not work tickets. Nobody pulls them. Kanban hides `label:swarm:state`.
 4. Create or find the swarm state issue, one brief issue per Active area, and one
    findings buffer per Active area (create the rest when an area is activated).
 5. Launch one coordinator per active area with the packet below. Each coordinator
-   runs [/area-coordinator](../area-coordinator/SKILL.md).
+   runs [/area-coordinator](../area-coordinator/SKILL.md). A coordinator spawns a coding
+   worker only for a ticket that passes **Codable ticket**. Handoff lanes are not that list.
 6. Post one status line per area to the founder. Name anything waiting on him.
 
 **Coordinator packet:**
@@ -87,12 +92,17 @@ COMPANIONS    v1 umbrella/DELEGATION.md, umbrella/BUILD-STANDING.md, umbrella/CO
               umbrella/PROJECT-CONFIG.md; umbrella-swarm skills/verify-own-work/SKILL.md,
               skills/recall/SKILL.md, skills/swarmy/SKILL-MAP.md
 FORBIDDEN     umbrella/SKILL.md; running a grill with the founder; merge outside MERGE_TIER;
-              master/Preview/OTA/migrate; editing another area's leased file; triage labels
+              master/Preview/OTA/migrate; editing another area's leased file; triage labels;
+              a coding spawn that fails **Codable ticket** (handoff lane, Done, closed,
+              unreadable status, or work already on <dev-branch>)
+CODING_GATE   before any coding spawn: area-coordinator **Codable ticket**
 STANDING      by path: swarm-mode/SKILL.md **Standing rules this mode keeps** (paste only for a
               coordinator that cannot read installed skills)
 ```
 
 **Brief opening order.** Standing rules, then the rule card; the changing part (ticket, files, findings) last so briefs within the hour share a cached prefix (same rule as `/swarmy-mode` **Standing rules**).
+
+**MESSAGING.** Keep messages succinct. DM the 1–2 target bots (SendToAgent); never post to a group room. Same rule for coordinators, CoS, Board, and Dispatch.
 
 Where a coordinator runs is a hosting choice: a Cursor Project (cloud coordinator
 with its own computer), a Claude Code cloud session, or a durable Grok bot lane. All
@@ -221,7 +231,10 @@ stalls in a week. Report the numbers; the founder confirms.
 
 ## Routing
 
-Board runs `/triage` on every new issue. **Creation rule at triage:** Board does
+Unassigned cards stay **Unclaimed**. Board runs `/triage` when work is unlabeled or
+being housed for a coordinator. A structure-only repair (native parent/sub-issues,
+blocked-by, milestone, Project membership, fitted Pipeline, or lane fit) is not that
+pass and does not assign the card. **Creation rule at triage:** Board does
 not accept an area, milestone, house or ticket without goal + why + done-check (a
 ticket: `So that:` line + ≥ 2 AC boxes). A missing part is a triage hit: the item
 stays out of every coordinator's plan until it's filled in. Triage now also checks the goal layers:
@@ -314,8 +327,10 @@ Dispatch:
    Why: each landed PR changes the trunk the next one runs on; checking each against
    the real tip catches what a batch check on a guessed tip misses (pstack
    `autopilot-full.md`).
-6. Sends the **after-merge ping**. The coordinator then sets the lane per `/implement`.
-   Merge never marks Done.
+6. Sends the **after-merge ping**. The coordinator then sets the lane from what is
+   left (`/implement` **End of house**, `/swarmy-mode` **Standing rules this mode keeps**).
+   Merge never marks Done. Phone-visible leftover stays on Desk device. Field is only
+   outdoor, GPS, or on-wrist proof. Land order stays step 5.
 
 **Never self-merge,** at any tier: DB migrations, master/Preview promotes, OTA,
 auth, Stripe or payments code, shared contracts, data deletion, a failed or missing rung.

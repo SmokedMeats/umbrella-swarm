@@ -61,7 +61,7 @@ areas:
     status: Next
     goal: A user can complete the next product chapter end-to-end.
     why: This chapter is the weekly reason to come back.
-    done_signal: Chapter houses Hit; phone-visible leftovers on Desk device or Field.
+    done_signal: Chapter houses Hit; phone-visible leftovers on Desk device; outdoor, GPS, or on-wrist leftovers on Field.
     milestones: []
     houses: []
     usually_touches:

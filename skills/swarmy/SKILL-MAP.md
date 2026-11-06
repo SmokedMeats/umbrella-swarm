@@ -10,7 +10,7 @@ A worker that cannot read installed skills (a cloud or sibling session whose che
 | --- | --- | --- |
 | `/swarmy-mode` | Chief of Staff (parent) | Sticky swarm front door |
 | `/swarmy` | Chief of Staff | Start, resume, pause, status, rotate, routing, leases, merge path |
-| `/area-coordinator` | One coordinator per Active area | Each cycle, house by house |
+| `/area-coordinator` | One coordinator per Active area | Each cycle, house by house. Coding spawn only after **Codable ticket** |
 | `verify-own-work` | Worker, then its verifier | Before a PR goes to Dispatch |
 | `/recall` | Chief of Staff, coordinator | Cold restart; rebuild state from GitHub |
 | templates (`templates/`) | Coordinator, Board | Brief issue, findings buffer, receipt, goal lines |
@@ -24,8 +24,8 @@ A worker that cannot read installed skills (a cloud or sibling session whose che
 | `/grill-me`, `/grilling` | Chief of Staff with the founder | Grill (founder gate) |
 | `/wayfinder` | Worker the coordinator spawns | Fog in a milestone |
 | `/to-spec`, `/to-tickets` | Worker | After a grill lock (carry fields kept) |
-| `/triage` | Board | Every new issue; goal lines |
-| `/implement` (child rules, Build loop, End of house) | Worker; coordinator for lanes | Build a ticket; lanes after merge |
+| `/triage` | Board | Unlabeled or housed work; goal lines. Structure-only graph repairs stay Unclaimed and unassigned |
+| `/implement` (child rules, Build loop, End of house) | Worker; coordinator for lanes | Build a ticket; lanes after merge from what is left (Desk device = phone-visible only; Field = outdoor / GPS / on-wrist only) |
 | umbrella `BUILD-STANDING.md` | Worker, verifier | Heavy gate, test scope, kill handling |
 | umbrella `DELEGATION.md` | Coordinator | Child shape by runtime, sibling contract, recheck at merge |
 | umbrella `CONVENTIONS.md` | Coordinator, worker | Repeated corrections (`/correct`), decision trail, comment cleanup, recall brief, DESIGN-IT-TWICE |
@@ -35,7 +35,7 @@ A worker that cannot read installed skills (a cloud or sibling session whose che
 | `/pit-of-success`, `/zero-tech-debt` | Verifier; `quality_area` coordinator | Footgun seams; rework from the end state |
 | `/how`, `/why`, `/teach`, `/teach-me` | Readonly worker; parent with the founder | Questions about the code; explaining |
 | `/principles` | Anyone | Mid-task redirect by name |
-| `device-qa-agent`, `device-qa-verifier` | Mobile QA Engineer, then verifier | Phone-visible tickets on Desk device (R7) |
+| `device-qa-agent`, `device-qa-verifier` | Mobile QA Engineer, then verifier | Phone-visible tickets on Desk device (R7). Field only for outdoor / GPS / on-wrist proof |
 
 ## Matt Pocock's pack
 

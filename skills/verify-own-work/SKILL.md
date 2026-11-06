@@ -36,16 +36,24 @@ closed (`build-verifier` rule).
 | --- | --- | --- |
 | **R0 static** | Who runs what is the **Check budget** below. Worker: package `verify` for each touched package. Verifier: package `verify` + `commands.pr_ready` at the verdict SHA (`build-verifier` **Gates at the verdict SHA**). Add `commands.governance` when governed files changed. | Worker: `verify` green. Verifier: the `commands.pr_ready_pass` line names the **current** <dev-branch> tip. Local scripts; no paid GitHub Actions. |
 | **R1 seam tests** | The changed seam's colocated test (create one if missing, per `/implement`), then the test files of direct callers, one file at a time (BUILD-STANDING **Tests: touched files and direct callers**), then the harness the spec's **Rule card** names (v1 `/to-spec`). | Green. No mock of the module under test. No tautological test. The harness reports no new failing row and meets the card's bar; its summary line is in the receipt. |
-| **R2 backend integration** | `pnpm --dir backend test:integration` and the relevant `*.postgresOnly.test.ts` against a throwaway test database (for example an ephemeral database branch). Never production. | Green on a database built from current migrations. |
+| **R2 backend integration** | `pnpm --dir backend test:integration` and the relevant `*.postgresOnly.test.ts` against a throwaway test database (for example an ephemeral database branch). Never Preview or Production. See **Database test lanes**. | Green on a database built from current migrations, with the required PostgreSQL cases executed. A skip is not this pass. |
 | **R3 web smoke** | Expo web build (`<mobile-pkg>`, `web` script) + Playwright smoke flows through the shared verification CLI. Do not write a one-off script; extend the CLI. | Flows for the touched screens pass; screenshots attached. Native-only paths (GPS, BLE, HealthKit, Health Connect, watch) → N/A with the reason. |
 | **R4 review** | At the `DEPTH` the verifier brief names (**Review depth**), against the spec's **Rule card**. At most two review rounds (v1 `/implement` **Build loop**); a hard finding after round 2 goes to the parent as a grill question in ESCALATE. | VERDICT pass; no in-scope findings left. |
 | **R5 fuzz** | `caps.verifier_fanout` verifier agents click around the web build like a user, looking for regressions outside the ticket. | No new regression, or each one fixed in this PR. |
 | **R6 emulator** | Optional, later: cloud Android emulator + Maestro, reusing `.maestro` flows. | Flows pass. |
-| **R7 real phone** | Not per PR. Mobile QA Engineer's sampled Desk device crawl, then `device-qa-verifier`. | Per `device-qa-verifier`. Phone-visible tickets stay open on Desk device until then. |
+| **R7 real phone** | Not per PR. Mobile QA Engineer's sampled Desk device crawl, then `device-qa-verifier`. | Per `device-qa-verifier`. Phone-visible tickets stay open on Desk device until then. Field is outdoor, GPS, or on-wrist proof only. R2 and other non-device proof are not Desk device or Field. |
 
-If the R3 CLI or the R2 test database doesn't exist yet, mark the rung
-`N/A: not built yet` and say so in the receipt. Do not count it as a pass for
-self-merge tiers.
+If the R3 CLI doesn't exist yet, mark R3 `N/A: not built yet` and say so in the
+receipt. Do not count that N/A as a pass for self-merge tiers. A skipped or missing
+PostgreSQL run is not an R2 pass (**Database test lanes**).
+
+## Database test lanes
+
+Keep real-database proof honest. Do not weaken required lanes.
+
+1. **Database-only unit tests:** where the repository uses `openTestPostgres()`, use that shared helper and its existing `TEST_PG_URL`/local-socket contract. Gate optional no-database runs with `describePg = TEST_PG ? describe : describe.skip`, or the existing fake/pg backend list. When `REQUIRE_TEST_PG=1`, a missing database must fail at load, never silently skip. Do not add a missing-database `beforeAll` throw to an optional run.
+2. **Receipts / R2:** skipped database tests never count as a real-database or R2 pass. Required PostgreSQL cases must actually execute and pass; R2 also requires its configured integration checks. Record the command, database harness and executed/skipped results. An optional local green run is not proof that required database checks passed.
+3. **Harness boundaries:** follow the repository's configured separation: disposable unit PostgreSQL; isolated integration databases such as throwaway Neon branches or Testcontainers, never shared Preview/Production integration targets; and shared Preview-app end-to-end tests. Use existing helpers and safety gates, not per-file connection logic. Do not claim a database check ran merely because a particular assistant or editor was used.
 
 ## Running the gates
 
@@ -159,5 +167,7 @@ Dispatch refuses a PR whose receipt lacks a rung its area lists or a VERDICT lin
 
 `commands.pr_ready_pass` naming the current <dev-branch> tip on every PR, run locally
 with no paid Actions · migrations need the founder (a test DB migrate is fine; production
-is not) · phone-visible tickets stay open on Desk device · real-phone QA is sampled,
-not skipped.
+is not) · skipped PostgreSQL is not a real-database or R2 pass; a required database
+lane fails closed · phone-visible tickets stay open on Desk device · Field is
+outdoor, GPS, or on-wrist only · real-phone QA is sampled, not skipped · on a fitted
+Pipeline, tick only the gate you ran, and only with evidence in this receipt.

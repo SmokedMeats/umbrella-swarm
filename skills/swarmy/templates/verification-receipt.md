@@ -27,13 +27,16 @@ RUNGS
                    merge: base unchanged | base moved → `commands.pr_ready` once on <new head sha>: PASS (hook skipped: yes/no)
                    check:governance: PASS | N/A (no governed files)
   R1 seam tests    PASS · <test files: touched + direct callers, one at a time> · <n> tests · harness: <the Rule card harness summary line> | none (card names no harness)
-  R2 integration   PASS | N/A (<reason>) · test DB: <name/branch, never production>
+  R2 integration   PASS | FAIL (required PostgreSQL skipped or missing) | N/A (no database in this change)
+                   command: <cmd> · harness: <helper or branch, never Preview/Production> · executed: <n> · skipped: <n>
+                   a skip is not a real-database or R2 pass
   R3 web smoke     PASS | N/A (<reason, e.g. native GPS only / CLI not built yet>) · flows: <names> · screenshots: <links>
   R4 review        DEPTH full | light (why) · build-verifier VERDICT pass · /code-review round <1|2> · in-scope findings: 0 · blast-radius probe (full): <one line + command>
                    red-on-old-code: <test(s) that fail on BASE_SHA, pass on HEAD_SHA> (full: 2+, light: 1)
   R5 fuzz          PASS | N/A · fan-out <0|1|3> · regressions found/fixed: <n>
   R6 emulator      N/A | PASS · <maestro flows>
   R7 real phone    not per PR · phone-visible: yes/no · if yes → ticket stays open on Desk device after merge
+                   Field only if outdoor / GPS / on-wrist proof remains · backend, SQL, CI, and other non-device proof are not Desk device or Field
 
 MIGRATION    none | <file> · the founder approved: <link> · applied to test DB only
 LEASES       none | <paths held>
