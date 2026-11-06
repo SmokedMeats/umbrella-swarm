@@ -41,7 +41,7 @@ the installed v1 file.
 | Fog in a milestone | `/wayfinder` (v1), `/research` (Matt) | worker you spawn |
 | Pre-grill gap list | umbrella `PRE-GRILL.md` (v1) | you; the parent runs `/grill-me` / `/grilling` with the founder |
 | After the grill lock | `/to-spec` → `/to-tickets` (v1), keeping `CARRY_FROM_GRILL` / `CARRY_FROM_SPEC` | worker you spawn |
-| Build a ticket | `/implement` child rules (v1), `/tdd`, `/prototype` + DESIGN-IT-TWICE, `/codebase-design` (Matt) | worker you spawn |
+| Build a ticket | `/implement` **Build loop** (**Shared full-flow entry** below), child rules (v1), `/tdd`, `/prototype` + DESIGN-IT-TWICE, `/codebase-design` (Matt) | worker you spawn |
 | Repro is the work | `/diagnosing-bugs` (Matt) | worker you spawn |
 | Questions about the code | `/how`, `/why` (v1) | readonly worker |
 | Verify | `verify-own-work` (umbrella-swarm), `build-verifier` (v1) | worker, then verifier |
@@ -51,7 +51,7 @@ the installed v1 file.
 | Decision trail | umbrella `CONVENTIONS.md` **Decision trail** (v1) | you, in the brief's **Decisions** table, default on |
 | Session end | `/handoff` (Matt), and the brief issue | you |
 
-Missing a pack → ESCALATE to the parent. Do not paste a v1 skill into a packet; name
+Missing a pack → ESCALATE to the parent, and leave that step blocked until the pack is installed. Do not paste a v1 skill into a packet; name
 it. Exception: a cloud or sibling worker that cannot read installed skills gets the
 named *sections* pasted (umbrella `DELEGATION.md` **Sibling contract**).
 Full map: [SKILL-MAP.md](../swarmy/SKILL-MAP.md).
@@ -66,7 +66,7 @@ Why: an item without a done-check can't be finished, verified or retired.
 
 | Level | Must have before it exists | Create when | Who creates | Retire when |
 | --- | --- | --- | --- | --- |
-| Area | Goal (end-user story) + Why it matters + done-signal | A burst of 3+ related issues fits no area's goal | Coordinator or parent proposes; **the founder approves**; starts Next or Parked | No codable ticket left and every PR merged or with Dispatch (Desk device / Field / Operator / Live Beta / GoLive never keep it open), or the founder drops it (`never_retire` / quality / infra areas: Idle, never retired) |
+| Area | Goal (end-user story) + Why it matters + done-signal | A burst of 3+ related issues fits no area's goal | Coordinator or parent proposes; **the founder approves**; starts Next or Parked | Code is done: no codable ticket remains and every PR is merged or with Dispatch. The five handoff lanes do not keep Active. The founder may drop it. `never_retire` in `areas.yml` can be Parked, not Retired. The done-signal is not this gate (**Retire when the code is done**). |
 | Milestone | `Ships …; done when <numbers>. Why: …. Area: <slug>.` | A slice of an area goal no milestone covers | Coordinator or parent proposes; **the founder approves** | Done-check passes → Hit, closed, proof in the brief (continuous queues never Hit) |
 | House | `House <slug>: <one outcome>; done when <numbers>. Why: <milestone goal>. Area: <slug>.` | The current house's done-check passed and the next finishable outcome has no house | **Coordinator** | Done-check passes → PASS + evidence in the brief |
 | Ticket | `So that:` line + `## Acceptance criteria` with ≥ 2 checkable boxes | Coordinator splits a house (`/to-tickets` after a lock, or directly) | **Coordinator** | Every AC checked with proof and the lane is Done (merge never marks Done) |
@@ -84,31 +84,55 @@ Why each:
 
 Drafted milestone goals: `docs/milestone-goals.md`.
 
-**Codable ticket (strict rule).** A ticket is coding work only when every part below holds. An open issue with `ready-for-agent` is not enough.
+**Codable ticket (strict):** a ticket is coding work only when **all** hold: issue open (not closed); live configured Project Status is readable; Status is a coding-frontier status (typically **Unclaimed** or **In Progress** — names from `project.yml`); Status is **not** Desk device, Field, Operator, Live Beta, GoLive, or Done; not leased to another area; has `ready-for-agent`, is not a spec, has `So that:` + ACs; and none of `wayfinder:grilling`, `needs:founder`, `needs:spend-approval`, `product-decision`, `wait:*`, `parked:*`. Then apply the **Coding-spawn gate** (same section / swarmy). Anything else is not yours to build.
 
-- Its live Project Status is readable from the configured board (`project.yml` `status_options`). Missing, unreadable, or conflicting with the issue (closed while the status says a coding lane, or more than one status) fails closed: do not spawn a coding worker.
-- That status is coding-eligible. **Desk device**, **Field**, **Operator**, **Live Beta**, and **GoLive** are handoff lanes, not coding candidates. **Done** and a closed issue are not coding candidates. **Ready to merge** stays the existing merge wait. Project **Parked** stays the pre-launch shelf.
-- It is not a spec, has a `So that:` line plus `## Acceptance criteria`, is not leased to another area, and carries none of: a grill label (`wayfinder:grilling`), `needs:founder`, `product-decision`, `wait:*`, `parked:*`.
-- Before spawn, read `<dev-branch>` for this ticket: the merged PR that belongs to it, and AC evidence on that tip. Do this even when the issue is still open, or a Refs issue is still open. If that evidence shows the work is already on the tip, skip. Do not spawn a coder for a stale label or a stale lane. A similar title is not that evidence.
-- An active PR or a live worker already on the ticket is the owner. Do not spawn a second coder.
-- A regression with new evidence is its own codable ticket. It does not turn a handoff lane back into coding. Device QA, Field checks, and verifiers still run. This rule does not stop them.
+**Coding-spawn gate:** before any coding Start or worker spawn, read the ticket's **live** configured Project Status (use the status names configured in `project.yml`). Human handoff lanes **Desk device**, **Field**, **Operator**, **Live Beta**, **GoLive**, and **Done** / closed issues are **not** coding candidates. Missing, unreadable, or conflicting Project Status → **no coding spawn** until reconciled (do not assign, label, or move the card from this gate). `ready-for-agent` and/or open alone are **never** sufficient. Skip coding when a **relevant** implementation for this ticket's ACs is already merged into `<dev-branch>` with AC/code evidence (linked closing/merged PR or equivalent); title or mention match alone is not proof; an open issue left for Refs does not reopen coding of shipped ACs. Skip when an active PR or live worker already owns the ticket (no duplicate launch). A genuine later bug/regression is **new** explicit codable work, not a routine restart of a handoff-lane ticket. Verification-only work (BV/QA) on a ticket already in a code or handoff lane remains allowed; do not treat an unrelated merged PR as completing all ACs. Project Status **Parked** stays the pre-launch shelf.
 
-Why: a handoff lane, or a ticket already on the tip, must not start another implementation worker.
+**Build a ticket that fails the Codable ticket / Coding-spawn gate** — never. Record a one-line skip on the brief when Status is handoff, missing, or shipped evidence applies.
 
 **Dry → tell the parent.** When no codable ticket is left in your area (none ready,
 none in flight), **DM** the parent once (`SendToAgent`): `DRY: <slug>`, with a one-line
-why. No timer: you say it when it is true, the parent does not poll you. Keep it succinct; never post DRY to a group room.
+why. That DM is the notice. A quiet cycle is not it. No timer: you send the DM when it becomes true; the parent does not poll you. Keep it succinct; never post DRY to a group room.
 
-**Retire when the code is done.** An area retires as soon as no codable ticket
+**Retire when the code is done.** An area leaves Active as soon as no codable ticket
 remains and every PR is merged or with Dispatch. Desk device, Field, Operator,
-Live Beta, and GoLive never keep an area open; that handoff runs later outside the area. The
+Live Beta, and GoLive never keep an area Active; that handoff runs later outside the area. The
 parent retires it: receipt on the brief, brief closed, findings buffer kept open,
-swarm state issue updated. `never_retire` areas (`areas.yml`) go Idle instead.
+swarm state issue updated. `never_retire` areas (`areas.yml`) are not Retired; they can be Parked (`/swarmy` **Retire**, and the `never_retire` note in `areas.example.yml`).
 The area's done-signal still guides the work; it is no longer the retire gate.
+
+
+## Pipeline checklist at creation
+
+The later creation rule overrides the earlier sweep: whoever creates a product ticket adds its Pipeline checklist at creation. The board does not sweep for it.
+
+**Code tickets** — fit the template to the ticket; drop steps that do not apply. Tick steps as they clear:
+
+- Spec/grill done
+- Code + unit tests
+- Rebase + static gates
+- Scoped Jest + type-check
+- Build Verifier PASS
+- Tech Lead (money/locking/migrations, else code review)
+- GitGuardian green
+- Dispatch GO (head, conflicts, queue order)
+- Squash-merge + record SHA
+- Preview migrate (if schema changed)
+- Lane / Project Status
+- Emulator, phone or field test (if applicable)
+- Production promote / OTA (only if ticket ships that path, Jacob yes)
+- Done / close
+
+**Spec, umbrella and parent tickets** — short list:
+
+- Grill locked
+- Spec written
+- Child tickets filed
+- Close
 
 ## Each cycle
 
-Default cadence is hourly (`caps.cycle`). One cycle:
+**Event wakes (Jacob 1:35 PM CT 2026-11-02).** No hourly timer. Wake only when something needs you: a ticket in your area goes Ready, a worker finishes or fails, a lease you asked for is granted, your tier changes, a Dispatch after-merge ping arrives, or CoS /swarmy pings you. Keep one heartbeat every 3h (the stale baseline below) so a dropped event never strands work. If the gate says DRY (nothing open, nothing in flight), skip the cycle comment and stop until the next event. Send the one `DRY: <slug>` DM from **Dry → tell the parent** first. A skipped comment is not that notice. You own scope and leases. CoS /swarmy owns fan-out; don't babysit workers between events. One cycle:
 
 ### 0. Gate (when `commands.crawl_tick_gate` is set)
 
@@ -143,10 +167,8 @@ Do not clear usage park yourself; the parent clears it on probe recovery.
 
 ### 3. Plan
 
-- **Frontier:** unblocked tickets per `/implement` **Count first**. Order is native
-  parent/sub-issues and blocked-by. Leftover lanes don't block; Ready to merge does.
-  A structure-only gap (those links, Project membership, fitted Pipeline, lane fit)
-  stays **Unclaimed** and unassigned. Do not run a full triage just to repair it.
+- **Frontier:** unblocked **Codable** tickets per `/implement` **Count first** and the **Coding-spawn gate**. **Handoff** lanes (Operator, Desk device, Field, Live Beta, GoLive) are not coding frontier. **Leftover** is only Operator, Desk device, Field — those unlock dependents via `blocked_by`; Live Beta / GoLive `blocked_by` still holds. Ready to merge waits on merge (holds dependents) and is not a new coding spawn.
+- **Never pull** `needs:founder` or `needs:spend-approval` (adds or turns on a paid service or cost; Jacob approves first, standing 2026-10-22). Skip it like `parked:*`; it stays in the queue until the label comes off. Don't remove or disable code tied to it unless the ticket says so.
 - **No AC, no build.** A live ticket without `## Acceptance criteria` checkboxes, or
   without a `So that:` line pointing at its house goal (or milestone goal if
   unhoused), goes back to Board
@@ -190,7 +212,7 @@ Do not clear usage park yourself; the parent clears it on probe recovery.
 
 ### 4. Spawn
 
-One worker per ticket. Ship mode PR is forced for every worker: one ticket, one
+**Pre-spawn:** re-check **Codable ticket** + **Coding-spawn gate** on the live Project Status and GitHub evidence. Fail closed on unclear Status; skip shipped/handoff/duplicate. Then one worker per ticket. Ship mode PR is forced for every worker: one ticket, one
 branch, one PR into `<dev-branch>`.
 
 **Pick the worker's shape by runtime** (`/swarmy` **Workers by runtime**):
@@ -208,31 +230,13 @@ branch, one PR into `<dev-branch>`.
   `get_session` / `list_events`. It can't message you back; you hear only if a turn
   fails.
 
-**Coding spawn gate.** Run **Codable ticket** before the launch below. Handoff lanes (Desk device, Field, Operator, Live Beta, GoLive), Done, and closed issues get no coding worker. An unreadable or conflicting Project Status fails closed. Open plus `ready-for-agent` is not enough. Work already on `<dev-branch>` is a skip. An existing PR or worker is not duplicated.
-
 **Launch your own workers.** You spawn your own workers (cloud agents included)
 without asking the parent first, inside the caps above, on cloud only while the
 remaining included Cursor usage is at or above `caps.cloud_usage_floor` (below it:
 `build`, or park per **Park for usage**). Same gates for every worker.
 
 **Model tier.** Every packet you send (worker, verifier, review, search) carries
-`MODEL_TIER` with the umbrella `DELEGATION.md` **MODEL_TIER** role defaults:
-
-| Child | Tier |
-| --- | --- |
-| Coding worker | standard |
-| Verifier (`build-verifier`, `verifier_fanout` slots) | standard |
-| `/code-review`, the repeat-failure reviewer | deep |
-| Search / investigate (`/how`, `/why`, file discovery) | fast |
-
-A locked area (`standing-product-rules.md`) never gets a tier below its role
-default; raise it if in doubt. Pass the mapped `models.<runtime>.<tier>` from
-`project.yml` per runtime (umbrella-mode **Task / bot dispatch rules** step 3a:
-Claude `Agent` `model`; Cursor Task `model` / `.cursor/agents` `model:` /
-`/v1/agents` `model.id`; Grok Build `[subagents.models]` / `spawn_subagent` `model`).
-Unset row or a runtime that can't pick → pass nothing; the child inherits. The
-receipt names the model it ran on. Tiers change only which model a slot runs on:
-`coding_subagents_per_area`, `coding_subagents_total` and `verifier_fanout` stay as they are.
+`MODEL_TIER` from umbrella `DELEGATION.md` **MODEL_TIER**. That role table is the list. Do not copy it here. A locked area (`standing-product-rules.md`) never goes below its role default. Unset mapping follows that section's inherit rule. Tiers do not change `coding_subagents_per_area`, `coding_subagents_total`, or `verifier_fanout`.
 
 Use the implement-ticket packet from `umbrella/DELEGATION.md` and the `/implement`
 **Child rules**, plus:
@@ -241,9 +245,14 @@ Use the implement-ticket packet from `umbrella/DELEGATION.md` and the `/implemen
 MILESTONE_GOAL  the milestone's goal line, including Why   ← layer 2
 HOUSE_GOAL    the house goal line with its done-check   ← layer 3; keep it in view while building
 SKILLS        by name: /implement child rules (v1), /tdd (Matt) [+ /prototype, /codebase-design as needed]
+FULL_FLOW     /implement Build loop in full, swarm mode and standalone runtime coding.
+              Procedure: /implement Build loop. Do not paste a second chain.
+              Conditional triggers: umbrella CONVENTIONS.md Shared full-flow entry.
+              Missing section blocks the trigger. A fired trigger stays required.
+              A missing required skill blocks the step.
 TICKET        # + URL + So that line + ACs (+ sub-issues)
 SHAPE         cursor-cloud | in-process | sibling-session · BRANCH <the only branch you push>
-MODEL_TIER    standard (worker default; never lower for a locked area) · MODEL <mapped id, or inherit>
+MODEL_TIER    role default from umbrella DELEGATION.md MODEL_TIER (never lower for a locked area) · MODEL <mapped id, or inherit>
 PR_RULES      Mode B solo: this agent owns its branch; push only that branch;
               never push <dev-branch>, Preview, master, or another worker's branch; never merge
 SHARED_HELPERS  <existing helpers for this kind of change: path · what it does>. Use these.
@@ -311,18 +320,14 @@ Brief opening order: standing rules, then the rule card; ticket / files / findin
   record pass or fail with the evidence in the brief. Pass → house done; pick the
   next. Fail → the gap becomes a new ticket in the same house.
 
-- Set the lane from what is left (`/implement` **End of house**, and `/swarmy-mode`
-  **Standing rules this mode keeps**). **Merge never marks Done by itself.** Done
-  needs the applicable proof or QA. Names come from the configured board. Do not
-  add a Verify Status column.
-- Phone-visible leftover → Desk device with the **Waiting: Device QA** comment
-  (umbrella `DEVICE-QA.md`). The ticket stays open. Field only when outdoor, GPS,
-  or on-wrist proof is still open. Backend, SQL, CI, Railway, types, website-only,
-  reports, pure math, research, dependencies, and runtime proof do not use those lanes.
-- Project Status **Parked** is the pre-launch shelf, not an area roster status, and
-  not a hold for launched work that is waiting on a check.
-- On a fitted Pipeline, tick only the gates you own, and only with evidence. Phone
-  and field boxes stay unticked, with a reason, unless that leftover is real.
+- Set the lane from what is left (`/implement` **End of house** table, and `/swarmy-mode`
+  **Standing rules this mode keeps**): Desk device,
+  Field, Operator, Live Beta, GoLive, or Done. **Merge never marks Done by itself.**
+- Post one `POST_MERGE` receipt on the ticket and the brief: exact remainder
+  (still-open work, or none), lane, owner. The board Status and this receipt name
+  the same lane.
+- Phone-visible → Desk device with the **Waiting: Device QA** comment
+  (umbrella `DEVICE-QA.md`). The ticket stays open.
 - Close only when nothing is left, then `CLOSE-PARENTS.md`. Closed tickets keep
   their milestone.
 - Release any lease the PR held.
@@ -345,6 +350,14 @@ ESCALATE   questions only the founder or the parent can answer
 NEXT       first thing next cycle
 ```
 
+## State on GitHub (Jacob 1:35 PM CT 2026-11-02)
+
+Briefs live in brief issues. Leases live in the swarm state issue. Worker, BV, TL and DQA receipts live as PR comments (or ticket comments before a PR exists). Bot memory keeps only Jacob's standing rules. On a cold start, read GitHub, not chat.
+
+## Self-prove pilot (Jacob 1:35 PM CT 2026-11-02)
+
+Pilot area: **garden** only (Jacob 1:39 PM CT 2026-11-02), noted in the swarm state issue. Hold it until Cursor usage resets, and never fall back to the box. Every worker brief adds this step: before Ready, run [/verify-own-work](../verify-own-work/SKILL.md) on the real surface (adb or screenshots for UI, real commands for backend) and paste a `## Evidence` block in the PR body. BV and the DQA Verifier confirm that evidence and still run their own heavy set. Don't start workers in /poteto-mode (rule: no poteto install). No new board column.
+
 ## Things you never do
 
 - Write product code yourself.
@@ -355,7 +368,6 @@ NEXT       first thing next cycle
 - Write `project.yml` `paths.umbrella_cursor`. Your state is the brief issue.
 - Create an area, milestone, house or ticket without goal + why + done-check
   (a ticket: `So that` + ACs). Create an area or milestone without the founder's approval.
-- Build a ticket that fails the **Codable ticket** rule.
 - Send a packet below its role's `MODEL_TIER`, or change the caps.
 - Pull a ticket from another area (Active, Next or Parked). If it belongs to your
   goal, ask the parent to move its milestone into your area first.
@@ -371,3 +383,54 @@ Actions) · Dispatch before/after-merge pings · grills are Context / Choices /
 Recommend with end-user stories · carry checklist across lock → spec → tickets ·
 `/correct` → lint > test > skill line · master/Preview only on the founder's say-so ·
 migrations need the founder · the founder approves merges unless he opted this area into a tier. · **MESSAGING:** keep messages succinct; DM the 1–2 target bots (SendToAgent), never post to a group room.
+
+## Resync only when next (Jacob 2:10 CT 2026-10-15)
+
+Resync a product pull request onto `<dev-branch>` only after the pull request directly ahead of it in the merge queue has merged, or when queue order changes. Never resync pull requests further back. Dispatch pings the owner when a pull request is next; owners wait for that ping.
+
+## Gate by patch, not commit (Jacob 2:16 CT 2026-10-15)
+
+Patch-id reuse and the fresh recheck follow `/build-verifier` **Gate by patch, not commit** and **Merge-queue carry-over**, plus umbrella `DELEGATION.md` **Recheck at merge** and [/verify-own-work](../verify-own-work/SKILL.md) **Verdict across a rebase (patch-id rule)**. The owner re-checks those rules on the new head. When they say the verdict holds, run fast `commands.pr_ready` once. A code change in the patch goes back to the verifier. `caps` and **Self-prove pilot** stay as already written. This section does not restate those procedures.
+
+## Boxes ticked before moving forward (Jacob 2:39 CT 2026-10-15)
+
+- Before a product card moves to Ready to merge: every AC line plus Pipeline boxes Spec/grill through Dispatch GO must be ticked.
+- Before Done: every AC and every Pipeline box must be ticked.
+- A step fitted out counts as cleared only when it's marked N/A with a one-line reason (or struck through).
+- If anything is unticked, the card goes back with a comment listing the unticked boxes and AC lines by name.
+- Exempt: hand-off lanes Operator, Field, Desk device, Live Beta, GoLive (phone, field or founder steps may stay open there).
+- Whoever moves the card (area coordinator, Board, Dispatch) checks this first.
+
+## Tick owners (Jacob 5:17 AM CT 2026-11-05)
+
+Creator adds the fitted Pipeline checklist. Each owner ticks its box the moment its gate clears, never batched at the end:
+- Implement Worker: code + unit, rebase, static gates, Living docs, P* leaves.
+- Build Verifier: scoped Jest, type-check, BV PASS.
+- Tech Lead: review.
+- Dispatch: GitGuardian, GO, merge SHA.
+- Area coordinator / Board: lane, Preview migrate, close.
+- Device QA: phone / Field boxes, only if actually run.
+N/A boxes are ticked `[x]` and struck through with a one-line reason. AC boxes tick only with proof (link, SHA, log or screenshot). No Pipeline at create → creator fixes it before Start.
+
+## Native GitHub structure (Jacob 5:17 AM CT 2026-11-05)
+
+- Every child of a map/spec is a native GitHub **sub-issue** of its parent; the body `## Parent` line mirrors it.
+- Every real ordering gate is a native **Blocked by / Blocking** dependency; the body `## Blocked by` mirrors it.
+- Prose-only parent or blocker = incomplete; no Start until native links exist.
+- Don't create sub-issues just to mirror checklist steps.
+- Remediation: Unclaimed tickets stay unassigned; no forced full triage just to fix structure. Order: parent/sub-issues, dependencies, milestone, house, Project membership/Status; labels only where needed for an unambiguous graph; then ACs, fitted Pipeline, correct QA lane.
+- QA lane follows device-qa-agent `## Device QA IN / OUT`.
+
+## Shared full-flow entry (no new skill)
+
+Coding workers run `/implement` **Build loop** in full, for swarm mode and for standalone runtime coding. Conditional triggers are the trigger table in umbrella `CONVENTIONS.md` **Shared full-flow entry**. Name both in the worker brief. Paste them only under the sibling-contract exception above. Until that conventions section is installed, the trigger stays blocked. Do not invent it, and do not clear a trigger that already fired.
+
+The independent Build Verifier in **Review each returned PR** is a different agent from the writer. Ready to merge waits on that verdict. A required skill that is missing stays blocked: ESCALATE names it, and the step is not marked N/A.
+
+This entry leaves `## Self-prove pilot`, the Tech Lead line in **Pipeline checklist at creation**, and `## Gate by patch, not commit` as they stand.
+
+## Capability-limited handoff (runtime → configured Chief of Staff → owner)
+
+When you, or a runtime worker you parent, cannot move Project Status / Kanban or delete a merged feature branch, including a Claude board or branch action that process cannot perform, post `CAPABILITY_HANDOFF` on the ticket and the area brief using `/start-work` **Capability-limited handoff**: action, limit, ticket, PR, desired lane or branch-audit proof, owner, pending status. The configured **Chief of Staff** role (or the configured parent conductor) routes it to the owner who already has the access. When the owner finishes, post the completion receipt on the same thread.
+
+Keep leases and Status honest. Done waits on the real lane, not on a failed move. An in-progress branch stays until that owner deletes it after merge. A lagging board still shows the last known Status. Review state stays the review receipt.
