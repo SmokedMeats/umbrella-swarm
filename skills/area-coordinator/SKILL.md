@@ -120,7 +120,7 @@ The later creation rule overrides the earlier sweep: whoever creates a product t
 - Preview migrate (if schema changed)
 - Lane / Project Status
 - Emulator, phone or field test (if applicable)
-- Production promote / OTA (only if ticket ships that path, Jacob yes)
+- Production promote / OTA (only if the ticket ships that path and the founder approves)
 - Done / close
 
 **Spec, umbrella and parent tickets** — short list:
@@ -132,7 +132,7 @@ The later creation rule overrides the earlier sweep: whoever creates a product t
 
 ## Each cycle
 
-**Event wakes (Jacob 1:35 PM CT 2026-11-02).** No hourly timer. Wake only when something needs you: a ticket in your area goes Ready, a worker finishes or fails, a lease you asked for is granted, your tier changes, a Dispatch after-merge ping arrives, or CoS /swarmy pings you. Keep one heartbeat every 3h (the stale baseline below) so a dropped event never strands work. If the gate says DRY (nothing open, nothing in flight), skip the cycle comment and stop until the next event. Send the one `DRY: <slug>` DM from **Dry → tell the parent** first. A skipped comment is not that notice. You own scope and leases. CoS /swarmy owns fan-out; don't babysit workers between events. One cycle:
+**Event wakes.** No hourly timer. Wake only when something needs you: a ticket in your area goes Ready, a worker finishes or fails, a lease you asked for is granted, your tier changes, a Dispatch after-merge ping arrives, or CoS /swarmy pings you. Keep one heartbeat every 3h (the stale baseline below) so a dropped event never strands work. If the gate says DRY (nothing open, nothing in flight), skip the cycle comment and stop until the next event. Send the one `DRY: <slug>` DM from **Dry → tell the parent** first. A skipped comment is not that notice. You own scope and leases. CoS /swarmy owns fan-out; don't babysit workers between events. One cycle:
 
 ### 0. Gate (when `commands.crawl_tick_gate` is set)
 
@@ -168,7 +168,7 @@ Do not clear usage park yourself; the parent clears it on probe recovery.
 ### 3. Plan
 
 - **Frontier:** unblocked **Codable** tickets per `/implement` **Count first** and the **Coding-spawn gate**. **Handoff** lanes (Operator, Desk device, Field, Live Beta, GoLive) are not coding frontier. **Leftover** is only Operator, Desk device, Field — those unlock dependents via `blocked_by`; Live Beta / GoLive `blocked_by` still holds. Ready to merge waits on merge (holds dependents) and is not a new coding spawn.
-- **Never pull** `needs:founder` or `needs:spend-approval` (adds or turns on a paid service or cost; Jacob approves first, standing 2026-10-22). Skip it like `parked:*`; it stays in the queue until the label comes off. Don't remove or disable code tied to it unless the ticket says so.
+- **Never pull** `needs:founder` or `needs:spend-approval` (adds or turns on a paid service or cost; the founder approves first). Skip it like `parked:*`; it stays in the queue until the label comes off. Don't remove or disable code tied to it unless the ticket says so.
 - **No AC, no build.** A live ticket without `## Acceptance criteria` checkboxes, or
   without a `So that:` line pointing at its house goal (or milestone goal if
   unhoused), goes back to Board
@@ -350,13 +350,17 @@ ESCALATE   questions only the founder or the parent can answer
 NEXT       first thing next cycle
 ```
 
-## State on GitHub (Jacob 1:35 PM CT 2026-11-02)
+## State on GitHub
 
-Briefs live in brief issues. Leases live in the swarm state issue. Worker, BV, TL and DQA receipts live as PR comments (or ticket comments before a PR exists). Bot memory keeps only Jacob's standing rules. On a cold start, read GitHub, not chat.
+Briefs live in brief issues. Leases live in the swarm state issue. Worker, BV, TL and DQA receipts live as PR comments (or ticket comments before a PR exists). Bot memory keeps only configured standing rules (`standing-product-rules.md` when that file is present). It does not keep a personal rule set in chat. On a cold start, read GitHub, not chat.
 
-## Self-prove pilot (Jacob 1:35 PM CT 2026-11-02)
+## Self-prove pilot
 
-Pilot area: **garden** only (Jacob 1:39 PM CT 2026-11-02), noted in the swarm state issue. Hold it until Cursor usage resets, and never fall back to the box. Every worker brief adds this step: before Ready, run [/verify-own-work](../verify-own-work/SKILL.md) on the real surface (adb or screenshots for UI, real commands for backend) and paste a `## Evidence` block in the PR body. BV and the DQA Verifier confirm that evidence and still run their own heavy set. Don't start workers in /poteto-mode (rule: no poteto install). No new board column.
+The self-prove pilot applies to one configured pilot area: the single area named for this pilot on the swarm state issue. If no area is named there, the pilot is BLOCKED until that configuration is present. A missing binding is not N/A and does not start the pilot. Do not extend the pilot to every area.
+
+Do not start the pilot while `usage_parked` is set on the swarm state issue, while a brief carries `PARKED_CLOUD_USAGE`, or while included Cursor usage is under `caps.cloud_usage_floor`. Never fall back to the box.
+
+When the pilot area is configured and those usage holds are clear, every worker brief for that area adds this step: before Ready, run [/verify-own-work](../verify-own-work/SKILL.md) on the real surface (adb or screenshots for UI, real commands for backend) and paste a `## Evidence` block in the PR body. BV and the DQA Verifier confirm that evidence and still run their own heavy set. Don't start workers in /poteto-mode (rule: no poteto install). No new board column.
 
 ## Things you never do
 
@@ -384,15 +388,15 @@ Recommend with end-user stories · carry checklist across lock → spec → tick
 `/correct` → lint > test > skill line · master/Preview only on the founder's say-so ·
 migrations need the founder · the founder approves merges unless he opted this area into a tier. · **MESSAGING:** keep messages succinct; DM the 1–2 target bots (SendToAgent), never post to a group room.
 
-## Resync only when next (Jacob 2:10 CT 2026-10-15)
+## Resync only when next
 
 Resync a product pull request onto `<dev-branch>` only after the pull request directly ahead of it in the merge queue has merged, or when queue order changes. Never resync pull requests further back. Dispatch pings the owner when a pull request is next; owners wait for that ping.
 
-## Gate by patch, not commit (Jacob 2:16 CT 2026-10-15)
+## Gate by patch, not commit
 
 Patch-id reuse and the fresh recheck follow `/build-verifier` **Gate by patch, not commit** and **Merge-queue carry-over**, plus umbrella `DELEGATION.md` **Recheck at merge** and [/verify-own-work](../verify-own-work/SKILL.md) **Verdict across a rebase (patch-id rule)**. The owner re-checks those rules on the new head. When they say the verdict holds, run fast `commands.pr_ready` once. A code change in the patch goes back to the verifier. `caps` and **Self-prove pilot** stay as already written. This section does not restate those procedures.
 
-## Boxes ticked before moving forward (Jacob 2:39 CT 2026-10-15)
+## Boxes ticked before moving forward
 
 - Before a product card moves to Ready to merge: every AC line plus Pipeline boxes Spec/grill through Dispatch GO must be ticked.
 - Before Done: every AC and every Pipeline box must be ticked.
@@ -401,7 +405,7 @@ Patch-id reuse and the fresh recheck follow `/build-verifier` **Gate by patch, n
 - Exempt: hand-off lanes Operator, Field, Desk device, Live Beta, GoLive (phone, field or founder steps may stay open there).
 - Whoever moves the card (area coordinator, Board, Dispatch) checks this first.
 
-## Tick owners (Jacob 5:17 AM CT 2026-11-05)
+## Tick owners
 
 Creator adds the fitted Pipeline checklist. Each owner ticks its box the moment its gate clears, never batched at the end:
 - Implement Worker: code + unit, rebase, static gates, Living docs, P* leaves.
@@ -412,7 +416,7 @@ Creator adds the fitted Pipeline checklist. Each owner ticks its box the moment 
 - Device QA: phone / Field boxes, only if actually run.
 N/A boxes are ticked `[x]` and struck through with a one-line reason. AC boxes tick only with proof (link, SHA, log or screenshot). No Pipeline at create → creator fixes it before Start.
 
-## Native GitHub structure (Jacob 5:17 AM CT 2026-11-05)
+## Native GitHub structure
 
 - Every child of a map/spec is a native GitHub **sub-issue** of its parent; the body `## Parent` line mirrors it.
 - Every real ordering gate is a native **Blocked by / Blocking** dependency; the body `## Blocked by` mirrors it.
