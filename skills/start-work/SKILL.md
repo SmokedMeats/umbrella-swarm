@@ -24,7 +24,7 @@ Owned by **Chief of Staff** (or whoever parents Start). Quiet on noop after a su
 1. **Pick the work** (skip if the founder already named ticket(s) or an area).
    - Prefer **Active** areas from swarm:state / `areas.yml` (within `caps.active_coordinators`).
    - **Grill-done first.** Prefer tickets whose house/map already has a **locked grill** (gaps closed) and has advanced past grill — i.e. ready for `/to-spec` → `/to-tickets` → `/implement`, or already has implement tickets that pass the **Coding-spawn gate** below. Live status comes from `project.yml` `status_options`. On the example board the coding frontier is **Unclaimed** or **In Progress**. Do **not** Start coding on open live `wayfinder:grilling` / unlocked-grill work while any grill-done ticket that passes that gate exists in Active areas.
-   - Among grill-done candidates: not mid-build, not held by another path, not area-roster Parked / `wait:seasons-cadence` unless the founder asked to resume parked, and never `needs:founder` or `needs:spend-approval` (ticket adds or turns on a paid service; the founder approves first).
+   - Among grill-done candidates: not mid-build, not held by another path, not area-roster Parked / `wait:seasons-cadence` unless the founder asked to resume parked, and never `needs:founder` or `needs:spend-approval` (ticket adds or turns on a paid service; Jacob approves first, standing 2026-10-22).
    - **Coding-spawn gate:** read live configured Project Status. Do **not** Start coding when Status is Desk device, Field, Operator, Live Beta, GoLive, or Done, or the issue is closed. Missing/unreadable/conflicting Status → do not Start coding until reconciled (no assign/label/move from this gate). `ready-for-agent`/open alone never enough. Skip when relevant merged implementation evidence covers the ACs, or an active PR/worker already owns the ticket. Project **Parked** remains pre-launch only.
    - Break ties with area **Why it matters**, then Next-list rank on swarm:state, then oldest Ready.
    - Cap to one sensible burst (one house or a few non-overlapping tickets) so you do not dual-start exclusives.
@@ -71,7 +71,7 @@ The later creation rule overrides the earlier sweep: whoever creates a product t
 - Preview migrate (if schema changed)
 - Lane / Project Status
 - Emulator, phone or field test (if applicable)
-- Production promote / OTA (only if the ticket ships that path and the founder approves)
+- Production promote / OTA (only if ticket ships that path, Jacob yes)
 - Done / close
 
 **Spec, umbrella and parent tickets** — short list:
@@ -93,9 +93,9 @@ The later creation rule overrides the earlier sweep: whoever creates a product t
 - **MESSAGING:** keep messages succinct; DM the 1–2 target bots, never post to a group room.
 - Do not flip on-demand Cursor billing without an explicit founder yes.
 
-## Boxes ticked before moving forward
+## Boxes ticked before moving forward (Jacob 2:39 CT 2026-10-15)
 
-- Before a product card moves to Ready to merge: every AC line plus Pipeline boxes Spec/grill through Dispatch GO must be ticked.
+- Before a product card moves to Ready to merge: every AC line plus Pipeline boxes Spec/grill through Dispatch GO must be ticked. The same rule for the configured product is umbrella `private-bindings.md` **Product card** when that file is installed.
 - Before Done: every AC and every Pipeline box must be ticked.
 - A step fitted out counts as cleared only when it's marked N/A with a one-line reason (or struck through).
 - If anything is unticked, the card goes back with a comment listing the unticked boxes and AC lines by name.
@@ -106,7 +106,7 @@ The later creation rule overrides the earlier sweep: whoever creates a product t
 
 Refuse **coding** Start when swarm/area-coordinator **Codable ticket** / **Coding-spawn gate** fails: Status is Desk device, Field, Operator, Live Beta, GoLive, or Done; issue closed; Status missing/unreadable/conflicting; `ready-for-agent`/open alone; relevant merged implementation already covers the ACs; or an active PR/live worker already owns the ticket. Applies even when **Pick the work** is skipped because the founder already named ticket(s) or an area. Permitted non-coding Start outcomes — grill with the founder, Desk/Field/Operator QA, BV/verifier-only — are **not** blocked by this gate.
 
-## Start blockers: checklist and native links
+## Start blockers: checklist and native links (Jacob 5:17 AM CT 2026-11-05)
 
 Do not Start a ticket that lacks a fitted Pipeline checklist, or whose parent/blockers exist only in prose (no native sub-issue / Blocked by link). Bounce it to the creator to fix first. Details: area-coordinator `## Tick owners` and `## Native GitHub structure`. Also refuse coding Start that fails swarm/area-coordinator **Codable ticket** / **Coding-spawn gate** (handoff Status, unclear Status, shipped evidence, or duplicate worker).
 

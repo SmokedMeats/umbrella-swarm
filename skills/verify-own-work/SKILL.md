@@ -57,8 +57,8 @@ Keep real-database proof honest. Do not weaken required lanes.
 
 ## Running the gates
 
-These rules are v1's. Read them in `umbrella/BUILD-STANDING.md`; don't restate them
-in a brief, name them.
+Rules marked (BUILD-STANDING) are v1's. Read them in `umbrella/BUILD-STANDING.md`;
+don't restate them in a brief, name them.
 
 - **Heavy checks through the gate** (BUILD-STANDING): type check, package `verify`
   and `commands.pr_ready` run as `heavy <command>`, the slotted gate on
@@ -73,6 +73,10 @@ in a brief, name them.
   never end a turn waiting. Exit 137/143 is a kill: re-run it through the gate,
   never a FAIL rung. A second kill in a row is a capacity blocker in ESCALATE;
   the rung stays not run.
+- **Gate fixtures:** When a scan or ratchet gate changes, add fixtures for the
+  spellings that gate should catch, including SQL case, multiline joins,
+  ORM/Drizzle reads, and service-entry paths, and prove the gate fails on a
+  real past violation.
 
 ## Review depth
 
@@ -162,6 +166,11 @@ row: one `commands.pr_ready` on the new head, plus the rungs a changed patch nee
 Use [verification-receipt.md](../swarmy/templates/verification-receipt.md). Paste it
 under `## Verification` in the PR body (umbrella `BUILD-STANDING.md` **PR briefing**).
 Dispatch refuses a PR whose receipt lacks a rung its area lists or a VERDICT line.
+
+- **Name grep:** Before PR-ready, grep the tests and gate scripts for every new
+  or renamed table, column, cron service, route, or export the diff touches.
+  Run those suites too, including postgresOnly suites against a real throwaway
+  Postgres (never production), plus `check:unused-exports`.
 
 ## Standing rules kept
 
