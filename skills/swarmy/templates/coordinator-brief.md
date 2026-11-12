@@ -50,9 +50,9 @@ Order is the plan: the house in focus first. Tickets that share files run one af
 | --- | --- | --- | --- | --- | --- |
 | #<n> | #<pr> | <agent id> | cursor-cloud / in-process / sibling `<session id>` · branch `<name>` | R<k> | |
 
-## Ready to merge (with Dispatch)
+## Ready to merge
 
-- #<pr> · receipt complete · pr-ready PASS on <tip sha> · overlaps: <paths or none>
+- #<pr> · `risk: low|high` · pr-ready pass names <head sha> · land-order or hot-file conflict: <none or paths>
 
 ## Leases
 

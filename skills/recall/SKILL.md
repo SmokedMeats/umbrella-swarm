@@ -43,7 +43,7 @@ Post it as the first cycle comment after a restart, and keep it short:
 RESUMED    <date time CT> from <sources used>
 GOAL       <area goal> · done-signal <met? no / how close>
 IN_FLIGHT  #ticket → PR · state · rung reached
-READY      PRs waiting on Dispatch or the founder
+READY      PRs waiting on the scripted gate, land order, or the founder
 BLOCKED    ticket · why · who
 LEASES     held / waiting
 CHANGED    merges since last cycle that touch our files

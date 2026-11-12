@@ -14,8 +14,8 @@ Installer commands that say `SmokedMeats/umbrella-swarm` correctly mean the **pu
 
 This pack is a layer on umbrella-skills (v1). It calls v1 skills by name and copies none of them (`swarm-mode` non-negotiable 8).
 
-- A rule v1 already has stays in v1: the heavy-check gate, test scope, kill handling (`umbrella/BUILD-STANDING.md`); the memory check, sibling contract and merge recheck (`umbrella/DELEGATION.md`); review depth and the receipt fields (`build-verifier`). Swarm skills name the section; they don't restate the rule or invent their own keys or lock files for it.
-- Only swarm-level rules live here: areas, coordinators, Dispatch tiers, per-area and total worker caps, docs last, verifier fan-out.
+- A rule v1 already has stays in v1: the heavy-check gate, test scope, kill handling (`umbrella/BUILD-STANDING.md`); the memory check and sibling contract (`umbrella/DELEGATION.md`). The merge gate is `verify-own-work` **Scripted gate** (the product `commands.pr_ready` script). Swarm skills name that section; they don't restate risk paths, database-test rules, or a second verifier.
+- Only swarm-level rules live here: areas, coordinators, Dispatch for land order and hot-file conflicts, per-area and total worker caps, docs last. The merge gate is `verify-own-work` **Scripted gate**. Do not add a default extra verifier.
 - `project.example.yml` is the same file in both packs. Change it in umbrella-skills first, then copy it here byte for byte. Swarm-only settings go in `areas.example.yml`.
 
 Everything an installed agent must read lives under `skills/` (sync copies only `skills/*`): the skill map is `skills/swarmy/SKILL-MAP.md`, the templates are `skills/swarmy/templates/`. Link to them from skills with relative paths; never from a skill to `README.md` or `docs/`.

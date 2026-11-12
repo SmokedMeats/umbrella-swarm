@@ -14,8 +14,8 @@ This public pack keeps:
 1. **Active cap** — how many area coordinators run at once, and why.
 2. **Areas** — every open milestone maps to exactly one area; statuses Active / Next / Parked / Retired.
 3. **Layered goals** — Area → Milestone → House → Ticket (each with a why + done-check).
-4. **Handoffs** — Board (intake), Dispatch (merge path), founder gates (promote / migrate / irreversible).
-5. **Verification ladder** — receipt rungs before merge autonomy rises.
+4. **Handoffs** — Board (intake), Dispatch (land order and hot-file conflicts only), founder gates (promote / migrate / irreversible).
+5. **Verification** — [verify-own-work](../skills/verify-own-work/SKILL.md) **Scripted gate**.
 6. **Collisions** — `usually_touches` + hot-file leases.
 7. **Rotation** — when an Active slot frees and who takes it.
 8. **Worker runtime** — where workers run (Cursor cloud VM, Claude Code in-process, Claude Code sibling session), the memory check and heavy-check gate for shared containers (both v1 rules in umbrella-skills).

@@ -3,7 +3,7 @@ name: swarmy
 description: >
   Conductor recipe for the product swarm: start, resume, pause, or check status;
   spin up, pause, or retire area coordinators; grant leases; route tickets by area;
-  run the merge path with Dispatch. Use under /swarmy-mode, or when the founder asks to
+  run the merge path (scripted gate; Dispatch for land order and hot-file conflicts). Use under /swarmy-mode, or when the founder asks to
   start or resume the swarm. Reuses /triage, /grilling, /to-spec, /to-tickets,
   /implement, /code-review and /correct from umbrella-skills by name (v1 and
   Matt's pack must be installed alongside).
@@ -78,7 +78,7 @@ BRIEF         <brief issue URL>
 BUFFER        <findings buffer issue URL>
 MILESTONES    titles + goal lines (with Why) from GitHub   ← layer 2
 HOUSES        slugs + house goal lines (done-check, Why) from GitHub / areas.yml   ← layer 3, the coordinator's finish lines
-CAPS          coding_subagents_per_area, coding_subagents_total, verifier_fanout, pr_soft_cap_files, cycle,
+CAPS          coding_subagents_per_area, coding_subagents_total, cycle,
               sibling_sessions_allowed (areas.yml); limits.* (project.yml, v1: memory check, heavy gate)
 RUNTIME       cursor-cloud | claude-code (worker shapes per **Workers by runtime**)
 MERGE_TIER    0 | 1 | 2   (from the swarm state issue)
@@ -299,41 +299,15 @@ The lease table is on the swarm state issue:
 
 ## Merge path
 
-The coordinator hands a PR to Dispatch only with a complete receipt
-([verify-own-work](../verify-own-work/SKILL.md)) whose **VERDICT** comes from an
-agent that didn't write the PR. Green CI or a bot review is not a verdict.
-Why: an author grading its own work misses what it misread (pstack `shipping.md`).
-Dispatch:
+Follow [verify-own-work](../verify-own-work/SKILL.md) **Scripted gate** (pending the product PR that teaches `commands.pr_ready` to print `risk:`). The receipt lists every area rung as PASS or N/A with a reason, and the script's pass line names the head you merge. Do not restate risk paths here.
 
-1. Checks the receipt has every rung the area lists, or N/A with a reason, and a
-   VERDICT line (verifier, head SHA, base SHA, patch-id).
-2. Checks leases and overlaps with other Ready PRs (soft-queue overlap check).
-3. Sends the **before-merge ping**.
-4. **Tier 0:** waits for the founder's approval. **Tier 1/2:** merges only if the PR fits
-   that tier's rules on the swarm state issue. Otherwise waits for the founder.
-5. **Lands one PR at a time from the bottom (stack base first, else oldest Ready), each rechecked on the current tip.**
-   Before each merge, if `<dev-branch>` moved since the verdict: merge or rebase it
-   into the PR, run `commands.pr_ready` **once** on the new head (the
-   `commands.pr_ready_pass` line must name that tip; it is the CI for `<dev-branch>`
-   PRs), and push with the pre-push hook off (`HUSKY=0`; it would re-run that same
-   check). Then the **patch-id rule** (v1 DELEGATION **Recheck at merge**;
-   [verify-own-work](../verify-own-work/SKILL.md) **Verdict across a rebase**):
-   same patch-id, or a change only in docs/tests/lint config → the verdict holds;
-   code changed → back to the verifier first. Base unchanged → the verifier's
-   `pr_ready` run stands. Budget: verify-own-work **Check budget per ticket**.
-   There is no combined pre-merge check of several PRs: cross-ticket breakage shows
-   up here, on the next PR's updated head, and the consuming repo's own scheduled
-   heavy check covers the merged tip.
-   Why: each landed PR changes the trunk the next one runs on; checking each against
-   the real tip catches what a batch check on a guessed tip misses (pstack
-   `autopilot-full.md`).
-6. Sends the **after-merge ping**. The coordinator then sets the lane from what is
-   left (`/implement` **End of house**, `/swarmy-mode` **Standing rules this mode keeps**).
-   Merge never marks Done. Phone-visible leftover stays on Desk device. Field is only
-   outdoor, GPS, or on-wrist proof. Land order stays step 5.
+Land one PR at a time from the bottom (stack base first, else oldest Ready). After `<dev-branch>` moves, run `commands.pr_ready` on the new head before that merge.
 
-**Never self-merge,** at any tier: DB migrations, master/Preview promotes, OTA,
-auth, Stripe or payments code, shared contracts, data deletion, a failed or missing rung.
+**Tier 0** waits for the founder before that merge. **Tier 1/2** merge when the scripted gate is met and the PR fits that tier on the swarm state issue.
+
+Dispatch's only merge job is land order and hot-file conflicts. It pings the owner who is next, and it blocks a merge that shares a leased or hot path with another Ready PR. It does not re-run the ladder. After merge, the coordinator sets the lane from what is left (`/implement` **End of house**, `/swarmy-mode` **Standing rules this mode keeps**). Merge never marks Done. Phone-visible leftover stays on Desk device. Field is only outdoor, GPS, or on-wrist proof.
+
+**Never self-merge,** at any tier: DB migrations, master/Preview promotes, OTA, auth, Stripe or payments code, shared contracts, data deletion, a failed or missing rung.
 
 A revert of a self-merged PR drops that area one tier and goes through `/correct`.
 

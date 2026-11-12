@@ -66,12 +66,10 @@ It runs the [/swarmy](../swarmy/SKILL.md) recipe and keeps area coordinators goi
     `coding_subagents_per_area` / `coding_subagents_total` count every worker on any
     runtime. In Claude Code the memory check picks in-process or sibling inside those
     caps; it never applies on Cursor.
-    Why: 12 in-process workers in one 15 GB container hit 7 OOM kills and shipped no
-    PR in an hour (2026-10-11); Cursor workers each have their own VM.
-11. **Each ticket is verified by an agent that didn't write it, and rechecked at
-    merge** on the current `<dev-branch>` tip (`/swarmy` **Merge path**).
-    Why: pstack `shipping.md`; self-grading and batch checks on a stale tip let
-    cross-ticket breakage through.
+    Why: a shared container OOMs when too many in-process workers type-check at once
+    (`/swarmy` **Workers by runtime**).
+11. **Merge gate:** [verify-own-work](../verify-own-work/SKILL.md) **Scripted gate**,
+    then `/swarmy` **Merge path**. Read that section. Do not restate it.
 12. **Cursor usage Start gate (Cursor cloud runtime).** Do not Start, Resume-to-spawn, spin-up, or
     activate an area when remaining included Cursor usage is under
     `caps.cloud_usage_floor` (default 10%) or a cloud-agent probe launch fails for
@@ -161,10 +159,10 @@ coordinator or worker that cannot read installed skills (umbrella `DELEGATION.md
 - Order real waits with native parent/sub-issues and GitHub blocked-by.
 - Status after the work is whatever is left (`/implement` **End of house**). **Desk device** is a phone-visible leftover only. **Field** is outdoor, GPS, or on-wrist proof only. Backend, SQL, CI, Railway, types, website-only, reports, pure math, research, dependencies, and runtime proof are not those lanes. Do not record them as one emulator, phone, or field box.
 - When the configured board has a fitted Pipeline, the owner of each gate ticks only that gate, and only with evidence. Phone and field boxes stay unticked, with a one-line reason, unless that leftover is real.
-- Merge does not mark Done. Done needs the applicable proof or QA. Phone-visible issues stay open on Desk device for Device QA. Dispatch still lands one PR at a time from the bottom (`/swarmy` **Merge path**).
-- Before a coding worker spawn, Project Status must be readable and coding-eligible (`/area-coordinator` **Codable ticket**). Desk device, Field, Operator, Live Beta, and GoLive are handoff lanes, not coding candidates. Done and closed are not coding candidates. A missing or conflicting status fails closed. Open and `ready-for-agent` is not enough. If `<dev-branch>` already has the implementation (merged PR and AC evidence, including a Refs issue still open), do not spawn another coder. A similar title is not proof. An existing PR or worker is not duplicated. A newly evidenced regression is new scope. This does not stop verifiers or Device QA.
-- Every PR into `<dev-branch>` carries a `commands.pr_ready_pass` line naming the current `<dev-branch>` tip. It's a local script with no paid GitHub Actions.
-- Dispatch sends the before-merge and after-merge pings.
+- Merge does not mark Done. Done needs the applicable proof or QA. Phone-visible issues stay open on Desk device for Device QA. Land one PR at a time from the bottom. Dispatch only for land order or a hot-file conflict (`/swarmy` **Merge path**).
+- Before a coding worker spawn, Project Status must be readable and coding-eligible (`/area-coordinator` **Codable ticket**). Desk device, Field, Operator, Live Beta, and GoLive are handoff lanes, not coding candidates. Done and closed are not coding candidates. A missing or conflicting status fails closed. Open and `ready-for-agent` is not enough. If `<dev-branch>` already has the implementation (merged PR and AC evidence, including a Refs issue still open), do not spawn another coder. A similar title is not proof. An existing PR or worker is not duplicated. A newly evidenced regression is new scope. This does not stop a high-risk Build Verifier or Device QA.
+- Every PR into `<dev-branch>` is gated by [verify-own-work](../verify-own-work/SKILL.md) **Scripted gate** (`commands.pr_ready`, local, no paid GitHub Actions).
+- Dispatch pings only for land order or a hot-file conflict.
 - Grills use Context / Choices / Recommend with end-user stories (`/grilling`), run by the parent with the founder.
 - Grill lock → `/to-spec` → `/to-tickets` keep `CARRY_FROM_GRILL` / `CARRY_FROM_SPEC`.
 - `/correct` (umbrella **Repeated corrections**) turns a repeat correction into lint rule > test > skill line.

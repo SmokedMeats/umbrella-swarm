@@ -95,7 +95,7 @@ Only a few areas are Active at a time (the example uses 5; typical range 4–6).
 
 Raise the cap only when receipts are trusted, review stays light, there are no rate-limit stalls or cross-area conflicts, and reverts are rare. The rules live in [PLAN.md](docs/PLAN.md) and `caps` in your `areas.yml`.
 
-Where workers run matters too. On Cursor cloud each worker gets its own VM. On Claude Code, subagents share the coordinator's container, so a coordinator checks free memory before each spawn and sends the overflow to sibling cloud sessions; heavy checks (type check, `pr_ready`) go through umbrella-skills' slotted `heavy` gate, one per container, and tests stay narrow: only the touched files and their direct callers. Each ticket gets about three full type-check rounds: the worker's package `verify`, the verifier's `verify` + `pr_ready`, and one `pr_ready` at merge only if the base moved (verify-own-work **Check budget per ticket**). The worker caps count every worker on any runtime. Details: `/swarmy` **Workers by runtime**.
+Where workers run matters too. On Cursor cloud each worker gets its own VM. On Claude Code, subagents share the coordinator's container, so a coordinator checks free memory before each spawn and sends the overflow to sibling cloud sessions; heavy checks go through umbrella-skills' slotted `heavy` gate, one per container, and tests stay narrow: only the touched files and their direct callers. The merge gate is verify-own-work **Scripted gate** (`commands.pr_ready`). The worker caps count every worker on any runtime. Details: `/swarmy` **Workers by runtime**.
 
 ## Every goal has a why
 
@@ -117,7 +117,7 @@ Sub-issues split a ticket; they are not goals. **Nothing is created without its 
 | **Chief of Staff** (parent agent) | Talks to the founder. Owns grills, irreversible gates, and rotation. |
 | **Area coordinator** | Runs one Active area's umbrella loop through subagents. |
 | **Board** | Triage and intake. Enforces goal lines. |
-| **Dispatch** | Merge-path checks. |
+| **Dispatch** | Land order and hot-file conflicts. The merge gate is the product `check:pr-ready` script. |
 | **Founder** (human) | Merges (unless an area earned a higher autonomy tier), promotes held branches, runs migrations. |
 
 The names are generic on purpose. Bind the founder's display name and board ids in `project.yml`.
