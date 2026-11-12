@@ -158,7 +158,15 @@ node scripts/check-public-safe.mjs --base <ref> # <ref>..HEAD, e.g. a stacked PR
 node scripts/check-public-safe.mjs --tree       # whole tracked tree at HEAD (audit)
 ```
 
-A clean run prints one line, e.g. `check:public-safe PASS <repo>@<sha> (gitleaks 0, denylist 0)`. Paste it in the PR body.
+A clean run prints one line, e.g. `check:public-safe PASS <repo>@<sha> (gitleaks 0, denylist 0)`.
+
+For a pull request, including a docs-only one, run:
+
+```bash
+node scripts/check-pr-ready.mjs
+```
+
+Paste the last line in the PR body: `pr-ready: PASS <head sha>`. The older docs-only stand-in — an independent exact-head Build Verifier pass plus a `## Evidence` block — is retired.
 
 ## Sources
 

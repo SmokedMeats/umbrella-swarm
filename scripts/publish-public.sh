@@ -46,8 +46,9 @@ Rebuilt as a fresh tree. No private history."
 NEW_SHA="$(git rev-parse HEAD)"
 echo "New orphan commit: $NEW_SHA"
 
-# 3. Safety gate (must be 0)
-PASS_LINE="$(node scripts/check-public-safe.mjs --tree)"
+# 3. Safety gate (must be 0). Keep the last line: a gitleaks command log must
+# not sit in front of the PASS line.
+PASS_LINE="$(node scripts/check-public-safe.mjs --tree | tail -n 1)"
 echo "$PASS_LINE"
 if [[ "$PASS_LINE" != check:public-safe\ PASS* ]]; then
   echo "check:public-safe failed; aborting publish" >&2
