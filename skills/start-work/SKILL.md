@@ -25,7 +25,7 @@ Owned by **Chief of Staff** (or whoever parents Start). Quiet on noop after a su
    - Prefer **Active** areas from swarm:state / `areas.yml` (within `caps.active_coordinators`).
    - **Grill-done first.** Prefer tickets whose house/map already has a **locked grill** (gaps closed) and has advanced past grill — i.e. ready for `/to-spec` → `/to-tickets` → `/implement`, or already has implement tickets that pass the **Coding-spawn gate** below. Live status comes from `project.yml` `status_options`. On the example board the coding frontier is **Unclaimed** or **In Progress**. Do **not** Start coding on open live `wayfinder:grilling` / unlocked-grill work while any grill-done ticket that passes that gate exists in Active areas.
    - Among grill-done candidates: not mid-build, not held by another path, not area-roster Parked / `wait:seasons-cadence` unless the founder asked to resume parked, and never `needs:founder` or `needs:spend-approval` (ticket adds or turns on a paid service; Jacob approves first, standing 2026-10-22).
-   - **Coding-spawn gate:** read live configured Project Status. Do **not** Start coding when Status is Desk device, Field, Operator, Live Beta, GoLive, or Done, or the issue is closed. Missing/unreadable/conflicting Status → do not Start coding until reconciled (no assign/label/move from this gate). `ready-for-agent`/open alone never enough. Skip when relevant merged implementation evidence covers the ACs, or an active PR/worker already owns the ticket. Project **Parked** remains pre-launch only.
+   - **Coding-spawn gate:** [area-coordinator](../area-coordinator/SKILL.md) **Codable ticket**. Do not restate it.
    - Break ties with area **Why it matters**, then Next-list rank on swarm:state, then oldest Ready.
    - Cap to one sensible burst (one house or a few non-overlapping tickets) so you do not dual-start exclusives.
    - **Only grill left:** if no grill-done / implement-ready work remains but open live grilling (or pre-grill) work does, **do not invent build tickets**. Parent runs `/grilling` (or `/grill-me` on wayfinder siblings) with the founder — that is the Start outcome. Report “grilling you next” + which house/ticket.
@@ -48,33 +48,32 @@ Cold restarts read GitHub (`/recall`), so progress must live on issues — not c
 **Cloud** (already in `/swarmy`): on usage park, rewrite the area brief `PARKED_CLOUD_USAGE` · timestamp · in flight (agent ids / PRs / tickets) · next tickets · leases · last spawn · error; append findings-buffer comment; set `usage_parked` on swarm:state.
 
 **Local** (required whenever a local `/umbrella` / Grok Build run stops mid-ticket — crash, Window full, handoff, Stop, or Start router parks cloud and continues local):
-1. Keep assignee + Project Status **In Progress** (claim stays). Do not move the card to Project **Parked**, Desk device, or Field from this note. Desk device is phone-visible leftover only. Field is outdoor, GPS, or on-wrist proof only. Unclaimed stays unassigned; a structure-only repair (native parent/sub-issues, blocked-by, fitted Pipeline) is not a full triage and does not assign the card. On a fitted Pipeline, tick only a gate you ran, and only with evidence. Status names come from the configured board (`project.yml`). Do not add a Verify Status column.
+1. Keep assignee + Project Status **In Progress**. Do not move the card to Project **Parked** or a handoff lane from this note. Lane names and who may be coded stay [area-coordinator](../area-coordinator/SKILL.md) **Codable ticket**. On a fitted Pipeline, tick only a gate you ran.
 2. Comment on the ticket (and area brief / swarm:state if Active): `OVERFLOW_LOCAL` · timestamp · branch tip / WIP paths · open PR if any · AC / Build-loop remainder · blockers · next concrete step · machine name. The machine name is the configured runtime, not a hardcoded host.
 3. Label or note `overflow:local` so bare Start and the usage probe refuse dual-start and will not yank mid-local to cloud.
 4. Do not clear `overflow:local` until the local Build loop for that ticket is empty or the founder explicitly reclaims.
 
 ## Pipeline checklist at creation
 
-The later creation rule overrides the earlier sweep: whoever creates a product ticket adds its Pipeline checklist at creation. The board does not sweep for it.
+Whoever creates a product ticket adds this checklist at creation. The board does not sweep for it. Fit it to the ticket. Tick a box only when that gate ran and the receipt shows it. A `risk: low` merge does not wait on Build Verifier, Tech Lead, or Dispatch GO. Handoff lanes (Operator, Field, Desk device, Live Beta, GoLive) may stay open. Real-phone QA stays sampled. N/A is a one-line reason. The gate is [verify-own-work](../verify-own-work/SKILL.md) **Scripted gate**. When umbrella `private-bindings.md` **Product card** is installed, follow that file for the configured product.
 
-**Code tickets** — fit the template to the ticket; drop steps that do not apply. Tick steps as they clear:
+**Code tickets**
 
 - Spec/grill done
 - Code + unit tests
-- Rebase + static gates
-- Scoped Jest + type-check
-- Build Verifier PASS
-- Tech Lead (money/locking/migrations, else code review)
+- `commands.pr_ready` pass naming the current head (`risk:` from the script)
+- Build Verifier — only when the script prints `risk: high`
+- Tech Lead — only for money, auth, or migrations
 - GitGuardian green
-- Dispatch GO (head, conflicts, queue order)
+- Dispatch GO — only for land order or a hot-file conflict
 - Squash-merge + record SHA
-- Preview migrate (if schema changed)
+- Preview migrate (if schema changed) — founder
 - Lane / Project Status
-- Emulator, phone or field test (if applicable)
-- Production promote / OTA (only if ticket ships that path, Jacob yes)
+- Emulator, phone, or field test (if applicable). Real-phone QA stays sampled
+- Production promote / OTA (only if this ticket ships that path; founder yes)
 - Done / close
 
-**Spec, umbrella and parent tickets** — short list:
+**Spec, umbrella and parent tickets**
 
 - Grill locked
 - Spec written
@@ -93,22 +92,13 @@ The later creation rule overrides the earlier sweep: whoever creates a product t
 - **MESSAGING:** keep messages succinct; DM the 1–2 target bots, never post to a group room.
 - Do not flip on-demand Cursor billing without an explicit founder yes.
 
-## Boxes ticked before moving forward (Jacob 2:39 CT 2026-10-15)
-
-- Before a product card moves to Ready to merge: every AC line plus Pipeline boxes Spec/grill through Dispatch GO must be ticked. The same rule for the configured product is umbrella `private-bindings.md` **Product card** when that file is installed.
-- Before Done: every AC and every Pipeline box must be ticked.
-- A step fitted out counts as cleared only when it's marked N/A with a one-line reason (or struck through).
-- If anything is unticked, the card goes back with a comment listing the unticked boxes and AC lines by name.
-- Exempt: hand-off lanes Operator, Field, Desk device, Live Beta, GoLive (phone, field or founder steps may stay open there).
-- Whoever moves the card (area coordinator, Board, Dispatch) checks this first.
-
 ## Before any coding Start (including explicitly named tickets)
 
-Refuse **coding** Start when swarm/area-coordinator **Codable ticket** / **Coding-spawn gate** fails: Status is Desk device, Field, Operator, Live Beta, GoLive, or Done; issue closed; Status missing/unreadable/conflicting; `ready-for-agent`/open alone; relevant merged implementation already covers the ACs; or an active PR/live worker already owns the ticket. Applies even when **Pick the work** is skipped because the founder already named ticket(s) or an area. Permitted non-coding Start outcomes — grill with the founder, Desk/Field/Operator QA, BV/verifier-only — are **not** blocked by this gate.
+Refuse coding Start when [area-coordinator](../area-coordinator/SKILL.md) **Codable ticket** fails, including when the founder named the ticket. A grill, Desk / Field / Operator QA, and a high-risk Build Verifier are not coding Starts.
 
-## Start blockers: checklist and native links (Jacob 5:17 AM CT 2026-11-05)
+## Start blockers
 
-Do not Start a ticket that lacks a fitted Pipeline checklist, or whose parent/blockers exist only in prose (no native sub-issue / Blocked by link). Bounce it to the creator to fix first. Details: area-coordinator `## Tick owners` and `## Native GitHub structure`. Also refuse coding Start that fails swarm/area-coordinator **Codable ticket** / **Coding-spawn gate** (handoff Status, unclear Status, shipped evidence, or duplicate worker).
+Do not Start a ticket that lacks a fitted Pipeline checklist or native sub-issue / Blocked by links ([area-coordinator](../area-coordinator/SKILL.md) **Native GitHub structure**).
 
 ## Shared full-flow entry (no new skill)
 
@@ -118,9 +108,9 @@ A coding Start that clears the **Coding-spawn gate** runs `/implement` **Build l
 
 Conditional triggers follow the trigger table in umbrella `CONVENTIONS.md` **Shared full-flow entry**. Do not narrow that table. Until that section is installed beside these skills, a conditional trigger stays blocked. Do not invent a trigger. A missing product policy does not clear a trigger that already fired. A locked bug with a repro follows `/diagnosing-bugs` and `/implement` **Build loop**. Leave the existing grill lock as it is.
 
-Tick each fitted Pipeline box when its owner clears that gate, and record proof of the same kinds area-coordinator `## Tick owners` already requires for an AC box: a link, SHA, log, or screenshot. A box whose condition has not happened stays open. A step the ticket does not include is N/A only with the one-line reason in **Boxes ticked before moving forward**. A required skill that is not installed blocks the step that needs it. Do not mark the missing skill N/A.
+Tick each fitted box when its owner clears that gate, with a link, SHA, log, or screenshot in the receipt. A box whose condition has not happened stays open. A required skill that is not installed blocks the step that needs it.
 
-`verify-own-work` PR Evidence stays the pilot named in area-coordinator `## Self-prove pilot`. Tech Lead scope stays the fitted Pipeline line in **Pipeline checklist at creation**. Patch-id reuse follows `/build-verifier` **Gate by patch, not commit** and **Merge-queue carry-over**, umbrella `DELEGATION.md` **Recheck at merge**, and area-coordinator `## Gate by patch, not commit`. Fast `commands.pr_ready` runs only when those rules say the verdict holds. A code change in the patch goes back to the verifier. Do not copy those procedures, and do not substitute a shorter rerun list.
+The merge gate is [verify-own-work](../verify-own-work/SKILL.md) **Scripted gate**. Tech Lead scope is the Tech Lead line in **Pipeline checklist at creation**. Do not paste a second chain.
 
 ## Capability-limited handoff (runtime → configured Chief of Staff → owner)
 

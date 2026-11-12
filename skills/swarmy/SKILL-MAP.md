@@ -11,7 +11,7 @@ A worker that cannot read installed skills (a cloud or sibling session whose che
 | `/swarmy-mode` | Chief of Staff (parent) | Sticky swarm front door |
 | `/swarmy` | Chief of Staff | Start, resume, pause, status, rotate, routing, leases, merge path |
 | `/area-coordinator` | One coordinator per Active area | Each cycle, house by house. Coding spawn only after **Codable ticket** |
-| `verify-own-work` | Worker, then its verifier | Before a PR goes to Dispatch |
+| `verify-own-work` | Worker; Build Verifier only when `risk: high` | Scripted gate before merge |
 | `/recall` | Chief of Staff, coordinator | Cold restart; rebuild state from GitHub |
 | templates (`templates/`) | Coordinator, Board | Brief issue, findings buffer, receipt, goal lines |
 
@@ -30,8 +30,8 @@ A worker that cannot read installed skills (a cloud or sibling session whose che
 | umbrella `DELEGATION.md` | Coordinator | Child shape by runtime, sibling contract, recheck at merge |
 | umbrella `CONVENTIONS.md` | Coordinator, worker | Repeated corrections (`/correct`), decision trail, comment cleanup, recall brief, DESIGN-IT-TWICE |
 | umbrella `PROJECTS.md`, `DEVICE-QA.md`, `CLOSE-PARENTS.md`, `PARKED-TICKETS.md`, `PROJECT-CONFIG.md` | Coordinator | Board status, Device QA lane, closing, parking, config bindings |
-| `build-verifier` | Verifier (not the writer) | Every ticket, at the depth the brief names |
-| `/code-review`, `/blast-radius` | Verifier | Review rung (R4) |
+| `build-verifier` | One verifier, different model than the author | Only when `commands.pr_ready` prints `risk: high` ([verify-own-work](../verify-own-work/SKILL.md) **Scripted gate**) |
+| `/code-review`, `/blast-radius` | That high-risk Build Verifier | R4, only when risk is high |
 | `/pit-of-success`, `/zero-tech-debt` | Verifier; `quality_area` coordinator | Footgun seams; rework from the end state |
 | `/how`, `/why`, `/teach`, `/teach-me` | Readonly worker; parent with the founder | Questions about the code; explaining |
 | `/principles` | Anyone | Mid-task redirect by name |

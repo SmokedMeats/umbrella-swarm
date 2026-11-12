@@ -38,9 +38,9 @@ House <slug>: <one user-visible outcome>; done when <check with real numbers>. W
   write `done when: TBD from #<n> ACs` and ask the founder.
 - **The check is something you can run:** a backend test, a contract case, a web
   smoke flow, the numbers a phone-visible Desk device crawl reports, or an outdoor,
-  GPS, or on-wrist Field check. "Code is merged" is not a done-check. A skipped
-  database run is not a real-database pass. Desk device numbers are only for
-  phone-visible work.
+  GPS, or on-wrist Field check. "Code is merged" is not a done-check. Database
+  proof is [verify-own-work](../../verify-own-work/SKILL.md) **Database test lanes**.
+  Desk device numbers are only for phone-visible work.
 - **One set of numbers.** When the house's spec has a **Rule card** (v1 `/to-spec`),
   the done-check uses the card's bar and harness. Do not write a second set of numbers.
 - **Why names one milestone goal.** One house = one milestone = one area. A house
