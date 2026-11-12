@@ -24,4 +24,4 @@ When one issue changes both packs (an umbrella-skills issue with a swarm compani
 
 ## Before pushing
 
-See README **Before pushing** (`check:public-safe`).
+See README **Before pushing** (`check:public-safe`, and `node scripts/check-pr-ready.mjs` for the PR line).
