@@ -4,7 +4,7 @@
 
 version: 1
 org: <github-org>
-founder: <founder-name>          # irreversible merges / promotes
+founder: <founder-name>          # Preview/master promotes, OTA, migrations, data deletion, Railway, workflow, spend
 
 roles:
   cos: Chief of Staff            # parent gate for irreversible steps

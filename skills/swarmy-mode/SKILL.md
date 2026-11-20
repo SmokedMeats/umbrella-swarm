@@ -5,7 +5,7 @@ description: >
   instead of one house at a time. Use for /swarmy-mode, when the founder asks to start,
   resume, pause, or check the swarm, or when work belongs to an active area in
   areas.yml. The parent (Chief of Staff) owns founder gates, grills, the area
-  roster, leases, and merge tiers; area coordinators run /area-coordinator.
+  roster, and leases; area coordinators run /area-coordinator. Merge tiers do not gate who merges.
   Houses in Next or Parked areas still go through /umbrella (v1). Requires
   umbrella-skills and Matt's pack installed alongside.
 mode: true
@@ -28,7 +28,7 @@ It runs the [/swarmy](../swarmy/SKILL.md) recipe and keeps area coordinators goi
    and a coordinator on the same house.
    Why: the whole app stays covered, but only a few areas burn agents at once.
 2. **Parent owns:** area statuses (Active / Next / Parked), the active cap,
-   rotation, leases, merge tiers (all on the swarm state issue), grills with the founder,
+   rotation, leases (all on the swarm state issue), grills with the founder,
    founder gates, and spin-up / pause / retire.
    Area Active / Next / Parked is the coordinator roster. It is not Project Status.
    Project Status **Parked** is only the pre-launch ticket shelf.
@@ -43,8 +43,7 @@ It runs the [/swarmy](../swarmy/SKILL.md) recipe and keeps area coordinators goi
    [/area-coordinator](../area-coordinator/SKILL.md), never `umbrella/SKILL.md`.
 5. **State lives on GitHub.** Brief issues, the swarm state issue, and findings
    buffer issues. Never in chat memory. A cold restart runs [/recall](../recall/SKILL.md).
-6. **No irreversible step without the founder.** Merge (unless the founder opted that area
-   into a tier), master/Preview promote, OTA, migrations, data deletion.
+6. **No irreversible step without the founder.** Preview/master promote, OTA, migrations, data deletion, Railway, workflow files, and anything that spends money. After the land gate (TL when required, BV, the final pr-ready PASS on the same SHA, and the pre-merge check), the author session may merge its own PR.
 7. **No poteto install.** This pack borrows Lauren Tan's operating model. It does
    not install poteto-mode or pstack.
    Allowed pstack skills (Jacob 2:47 AM CT 2026-11-05): verify-own-work and show-me-your-work (garden self-prove pilot), statechart (opt-in), tdd, blast-radius, no-comments (only the one batched backend cleanup PR), why. Still excluded: poteto-mode, poteto-agent, pstack itself, unslop (deslop owns cleanup), principle-* skills.
@@ -141,7 +140,7 @@ each cycle.
 | "rotate" / "activate <area>" / "park <area>" | `/swarmy` **Rotate** |
 | "raise the cap" / "lower the cap" | Check `raise_rule` in `areas.yml`, report the numbers, change it only if the founder confirms |
 | "use as many agents as needed" | Raise the worker caps for this batch. Never the memory check: past it, Claude Code workers become sibling sessions or queue |
-| "opt <area> into Tier 1" | Write it on the swarm state issue. Dispatch enforces it. |
+| "opt <area> into Tier 1" | Record it on the swarm state issue if asked. It does not gate who merges. The author session merges after the land gate. |
 | "make <milestone> part of <area>" | Update the milestone's `Area:` line and areas.yml; Board relabels |
 
 ## Standing rules this mode keeps
@@ -166,8 +165,8 @@ coordinator or worker that cannot read installed skills (umbrella `DELEGATION.md
 - Grills use Context / Choices / Recommend with end-user stories (`/grilling`), run by the parent with the founder.
 - Grill lock → `/to-spec` → `/to-tickets` keep `CARRY_FROM_GRILL` / `CARRY_FROM_SPEC`.
 - `/correct` (umbrella **Repeated corrections**) turns a repeat correction into lint rule > test > skill line.
-- master and Preview promote only when the founder says so. DB migrations need the founder's approval.
-- the founder approves each merge unless he opted that area into a higher tier.
+- Preview/master promotes, OTA, migrations, data deletion, Railway, workflow files, and spend only when the founder says so.
+- After the land gate (TL when required, BV, final pr-ready PASS on the same SHA, and the pre-merge check), the author session may merge its own PR. Preview/master promotes, OTA, migrations, data deletion, Railway, workflow files, and anything that spends money still wait for the founder.
 - **MESSAGING:** keep messages succinct; DM the 1–2 target bots (SendToAgent), never post to a group room.
 
 ## Return contract (coordinator → parent)

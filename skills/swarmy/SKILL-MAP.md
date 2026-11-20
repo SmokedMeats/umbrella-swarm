@@ -30,7 +30,7 @@ A worker that cannot read installed skills (a cloud or sibling session whose che
 | umbrella `DELEGATION.md` | Coordinator | Child shape by runtime, sibling contract, recheck at merge |
 | umbrella `CONVENTIONS.md` | Coordinator, worker | Repeated corrections (`/correct`), decision trail, comment cleanup, recall brief, DESIGN-IT-TWICE |
 | umbrella `PROJECTS.md`, `DEVICE-QA.md`, `CLOSE-PARENTS.md`, `PARKED-TICKETS.md`, `PROJECT-CONFIG.md` | Coordinator | Board status, Device QA lane, closing, parking, config bindings |
-| `build-verifier` | One verifier, different model than the author | Only when `commands.pr_ready` prints `risk: high` ([verify-own-work](../verify-own-work/SKILL.md) **Scripted gate**) |
+| `build-verifier` | One verifier, a different agent than the author (same model is fine) | Only when `commands.pr_ready` prints `risk: high` ([verify-own-work](../verify-own-work/SKILL.md) **Scripted gate**) |
 | `/code-review`, `/blast-radius` | That high-risk Build Verifier | R4, only when risk is high |
 | `/pit-of-success`, `/zero-tech-debt` | Verifier; `quality_area` coordinator | Footgun seams; rework from the end state |
 | `/how`, `/why`, `/teach`, `/teach-me` | Readonly worker; parent with the founder | Questions about the code; explaining |

@@ -21,7 +21,8 @@ Owned by **Chief of Staff** (or whoever parents Start). Quiet on noop after a su
 
 ## Steps
 
-1. **Pick the work** (skip if the founder already named ticket(s) or an area).
+1. **Fresh checkout.** In the primary product repo root, run `node scripts/check-fresh.mjs`; stop if it exits non-zero. If that file isn't there, run `git fetch origin` and stop if the fetch fails, if `git status -sb` shows no upstream (`## <branch>` with no `...origin/…`), or if it shows `behind`. Ahead only is fine. Only fetch here: never pull, reset, stash, or switch branches (the founder may have work in progress). When you stop, tell the founder one line: the repo, the branch, the state (behind N / diverged / no upstream / fetch failed), and that the checkout was left as it was.
+2. **Pick the work** (skip if the founder already named ticket(s) or an area).
    - Prefer **Active** areas from swarm:state / `areas.yml` (within `caps.active_coordinators`).
    - **Grill-done first.** Prefer tickets whose house/map already has a **locked grill** (gaps closed) and has advanced past grill — i.e. ready for `/to-spec` → `/to-tickets` → `/implement`, or already has implement tickets that pass the **Coding-spawn gate** below. Live status comes from `project.yml` `status_options`. On the example board the coding frontier is **Unclaimed** or **In Progress**. Do **not** Start coding on open live `wayfinder:grilling` / unlocked-grill work while any grill-done ticket that passes that gate exists in Active areas.
    - Among grill-done candidates: not mid-build, not held by another path, not area-roster Parked / `wait:seasons-cadence` unless the founder asked to resume parked, and never `needs:founder` or `needs:spend-approval` (ticket adds or turns on a paid service; Jacob approves first, standing 2026-10-22).
@@ -30,16 +31,16 @@ Owned by **Chief of Staff** (or whoever parents Start). Quiet on noop after a su
    - Cap to one sensible burst (one house or a few non-overlapping tickets) so you do not dual-start exclusives.
    - **Only grill left:** if no grill-done / implement-ready work remains but open live grilling (or pre-grill) work does, **do not invent build tickets**. Parent runs `/grilling` (or `/grill-me` on wayfinder siblings) with the founder — that is the Start outcome. Report “grilling you next” + which house/ticket.
    - If nothing Ready and nothing to grill: say so in one line (and what is blocked); do not invent scope.
-2. **One owner.** If the chosen ticket already has `overflow:local` mid-build, or a live cloud agent / exclusive lease, do not dual-start. Status only; stop. (Grill sessions are founder-facing; they are not dual-started with a coding path on the same house.)
-3. **Probe Cursor included usage** the same way `/swarmy` Start gate does (remaining included % and a cloud-agent launch probe). **Skip the usage probe when the picked outcome is a grill session** (no cloud/local coding route yet).
-4. **Route** (coding picks only)
+3. **One owner.** If the chosen ticket already has `overflow:local` mid-build, or a live cloud agent / exclusive lease, do not dual-start. Status only; stop. (Grill sessions are founder-facing; they are not dual-started with a coding path on the same house.)
+4. **Probe Cursor included usage** the same way `/swarmy` Start gate does (remaining included % and a cloud-agent launch probe). **Skip the usage probe when the picked outcome is a grill session** (no cloud/local coding route yet).
+5. **Route** (coding picks only)
    - **At or above `caps.cloud_usage_floor` (default 10%) and probe OK** → cloud path: `/swarmy` Start/Resume for Active areas (Cursor cloud agents). Clear any stale `overflow:local` on tickets you are about to Start only if they are not mid-local.
    - **Under floor or probe fails** → local path: same tickets under `/umbrella` on the local machine (Grok Build). Mark each claimed ticket `overflow:local` (and note on swarm:state if Active). Tell the founder briefly: parked cloud / running local. Never enable on-demand billing yourself.
-5. **In-flight rules**
+6. **In-flight rules**
    - Cloud already running may continue toward 0% until launches fail; on fail set `PARKED_CLOUD_USAGE` / `usage_parked` (keeps Active slot) with the swarm park brief (agent ids / PRs / tickets / leases / error).
    - Mid-local finishes local — do not yank to cloud mid-build when usage recovers.
-6. **On usage recovery** (existing ~2h CoS probe): auto-resume swarm Starts for open tickets that are **not** mid-local only after each ticket passes the **Coding-spawn gate** again. Drop `overflow:local` only when reclaiming for cloud. Prefer cloud for **new** Starts once at or above floor.
-7. **Report** one short line: what was picked (ticket/area or grill session), path chosen (cloud|local|grill), and any still-parked or empty-queue items.
+7. **On usage recovery** (existing ~2h CoS probe): auto-resume swarm Starts for open tickets that are **not** mid-local only after each ticket passes the **Coding-spawn gate** again. Drop `overflow:local` only when reclaiming for cloud. Prefer cloud for **new** Starts once at or above floor.
+8. **Report** one short line: what was picked (ticket/area or grill session), path chosen (cloud|local|grill), and any still-parked or empty-queue items.
 
 ## Mid-stop progress notes (local = cloud shape)
 
@@ -55,17 +56,18 @@ Cold restarts read GitHub (`/recall`), so progress must live on issues — not c
 
 ## Pipeline checklist at creation
 
-Whoever creates a product ticket adds this checklist at creation. The board does not sweep for it. Fit it to the ticket. Tick a box only when that gate ran and the receipt shows it. A `risk: low` merge does not wait on Build Verifier, Tech Lead, or Dispatch GO. Handoff lanes (Operator, Field, Desk device, Live Beta, GoLive) may stay open. Real-phone QA stays sampled. N/A is a one-line reason. The gate is [verify-own-work](../verify-own-work/SKILL.md) **Scripted gate**. When umbrella `private-bindings.md` **Product card** is installed, follow that file for the configured product.
+Whoever creates a product ticket adds this checklist at creation. The board does not sweep for it. Fit it to the ticket. Tick a box only when that gate ran and the receipt shows it. A `risk: low` merge does not wait on Build Verifier or Tech Lead. It still needs the Land gate pre-merge check. Handoff lanes (Operator, Field, Desk device, Live Beta, GoLive) may stay open. Real-phone QA stays sampled. N/A is a one-line reason. The gate is [verify-own-work](../verify-own-work/SKILL.md) **Scripted gate**, which follows umbrella CONVENTIONS **Land gate**. When umbrella `private-bindings.md` **Product card** is installed, follow that file for the configured product.
 
 **Code tickets**
 
 - Spec/grill done
 - Code + unit tests
-- `commands.pr_ready` pass naming the current head (`risk:` from the script)
-- Build Verifier — only when the script prints `risk: high`
-- Tech Lead — only for money, auth, or migrations
+- `commands.pr_ready` step 1 on the current head (`risk:` from the script; a WAIT that only waits on review is enough here)
+- Tech Lead — for money, auth, permissions, entitlements, paid tiers, XP/economy/tokens, migrations, or write routes, when the land gate is high or `risk:` is missing. Deps, config, native, and locking stay Build Verifier only
+- Build Verifier — only when the script prints `risk: high` or has no `risk:` field
+- `commands.pr_ready` final PASS on the same SHA
 - GitGuardian green
-- Dispatch GO — only for land order or a hot-file conflict
+- Pre-merge check — every verdict is on the current SHA; no `do not merge` / `MERGE HOLD`; no freeze; not Preview/master; no migration, data deletion, Railway, or workflow change
 - Squash-merge + record SHA
 - Preview migrate (if schema changed) — founder
 - Lane / Project Status

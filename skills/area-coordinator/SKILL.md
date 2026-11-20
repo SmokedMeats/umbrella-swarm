@@ -23,7 +23,7 @@ serves the why, not just the work that is easiest to finish.
 
 ## You carry the area end to end
 
-You carry a triaged ticket to Ready to merge through your own subagents. The merge gate is [verify-own-work](../verify-own-work/SKILL.md) **Scripted gate**. Board triages in. Dispatch steps in only for land order or a hot-file conflict. The founder keeps grills, Tier 0 merge approval, migrations, and promotes.
+You carry a triaged ticket to Ready to merge through your own subagents. The merge gate is [verify-own-work](../verify-own-work/SKILL.md) **Scripted gate**. Board triages in. Dispatch steps in only for land order or a hot-file conflict. The founder keeps grills, migrations, data deletion, Preview/master promotes, OTA, Railway, workflow files, and anything that spends money.
 
 ## v1 skills you call by name (never copy)
 
@@ -120,7 +120,7 @@ GitHub wins over the brief.
 - Sibling-session workers: `get_session` for status, `list_events` for the final
   report, then fetch the pushed branch. Re-arm the `send_later` check-in while any
   are still working.
-- The swarm state issue: are you paused? Your merge tier? Your leases?
+- The swarm state issue: are you paused? Your leases? A recorded merge tier does not gate who merges.
 
 Paused → rewrite the brief, post a cycle comment, stop.
 `usage_parked` on the swarm state issue (or brief `PARKED_CLOUD_USAGE`) → same as
@@ -191,7 +191,7 @@ remaining included Cursor usage is at or above `caps.cloud_usage_floor` (below i
 `build`, or park per **Park for usage**). Same gates for every worker.
 
 **Model tier.** Every packet you send (worker, verifier, review, search) carries
-`MODEL_TIER` from umbrella `DELEGATION.md` **MODEL_TIER**. That role table is the list. Do not copy it here. A locked area (`standing-product-rules.md`) never goes below its role default. Unset mapping follows that section's inherit rule. Tiers do not change the worker caps. A high-risk Build Verifier uses a different model than the author ([verify-own-work](../verify-own-work/SKILL.md) **Scripted gate**).
+`MODEL_TIER` from umbrella `DELEGATION.md` **MODEL_TIER**. That role table is the list. Do not copy it here. A locked area (`standing-product-rules.md`) never goes below its role default. Unset mapping follows that section's inherit rule. Tiers do not change the worker caps. A high-risk Build Verifier is a different agent than the author (the same model is fine) ([verify-own-work](../verify-own-work/SKILL.md) **Scripted gate**).
 
 Use the implement-ticket packet from `umbrella/DELEGATION.md` and the `/implement`
 **Child rules**, plus:
@@ -285,8 +285,7 @@ Garden only, on the swarm state issue: before Ready, run [verify-own-work](../ve
 
 - Write product code yourself.
 - Run a grill with the founder. Prepare the gap list; the parent grills.
-- Merge outside your tier, promote master/Preview, OTA, or run a migration the founder
-  hasn't approved.
+- Preview/master promote, OTA, migrations, data deletion, Railway, workflow files, or anything that spends money, unless the founder approved that step. After the land gate (TL when required, BV, the final pr-ready PASS on the same SHA, and the pre-merge check), the author session may merge its own PR.
 - Apply triage labels or milestones to new inbound issues (Board does).
 - Write `project.yml` `paths.umbrella_cursor`. Your state is the brief issue.
 - Create an area, milestone, house or ticket without goal + why + done-check
@@ -299,7 +298,7 @@ Garden only, on the swarm state issue: before Ready, run [verify-own-work](../ve
 
 ## Standing rules you keep
 
-[/swarmy-mode](../swarmy-mode/SKILL.md) **Standing rules this mode keeps**. Do not paste a second copy. Master and Preview promote, migrations, spend, and sampled real-phone QA stay as written there and in [verify-own-work](../verify-own-work/SKILL.md).
+[/swarmy-mode](../swarmy-mode/SKILL.md) **Standing rules this mode keeps**. Do not paste a second copy. Preview/master promotes, OTA, migrations, data deletion, Railway, workflow files, spend, and sampled real-phone QA stay as written there and in [verify-own-work](../verify-own-work/SKILL.md).
 
 ## Resync only when next
 

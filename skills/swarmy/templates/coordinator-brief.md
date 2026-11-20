@@ -9,7 +9,7 @@ No secrets. No chat dumps.
 
 # Area: <slug>, <area name>
 
-**Status:** Active | paused | Next | Parked | Retired · **Merge tier:** 0 | 1 | 2 · **Last cycle:** <YYYY-MM-DD HH:MM CT>
+**Status:** Active | paused | Next | Parked | Retired · **Merge tier (does not gate who merges):** 0 | 1 | 2 · **Last cycle:** <YYYY-MM-DD HH:MM CT>
 
 ## Area goal (layer 1)
 
@@ -61,7 +61,7 @@ Order is the plan: the house in focus first. Tickets that share files run one af
 
 ## Waiting on the founder
 
-- <grill / merge approval / migration approval / opt-in>, in end-user words
+- <grill / Preview/master promote / OTA / migration / data deletion / Railway / workflow / spend / opt-in>, in end-user words
 
 ## Decisions
 

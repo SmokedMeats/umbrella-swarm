@@ -20,7 +20,7 @@ The multi-agent shape is borrowed from how [Lauren Tan (poteto)](https://github.
 
 | Word | Meaning |
 | --- | --- |
-| **Founder** | The human who owns the product. Reviews, merges, and makes the irreversible calls. |
+| **Founder** | The human who owns the product. Makes the irreversible calls (Preview/master promotes, OTA, migrations, data deletion, Railway, workflow files, and spend). The author session merges a `<dev-branch>` PR after the land gate. |
 | **Area** | One product goal (for example "checkout works offline"). Every open milestone belongs to exactly one area. |
 | **House** | A named pack of related issues worked as a unit (the `umbrella:…` label from umbrella-skills). Smaller than a milestone. |
 | **Area coordinator** | An agent that runs the umbrella loop for one area, house by house. |
@@ -118,7 +118,7 @@ Sub-issues split a ticket; they are not goals. **Nothing is created without its 
 | **Area coordinator** | Runs one Active area's umbrella loop through subagents. |
 | **Board** | Triage and intake. Enforces goal lines. |
 | **Dispatch** | Land order and hot-file conflicts. The merge gate is the product `check:pr-ready` script. |
-| **Founder** (human) | Merges (unless an area earned a higher autonomy tier), promotes held branches, runs migrations. |
+| **Founder** (human) | Preview/master promotes, OTA, migrations, data deletion, Railway, workflow files, and spend. The author session merges a `<dev-branch>` PR after the land gate. |
 
 The names are generic on purpose. Bind the founder's display name and board ids in `project.yml`.
 

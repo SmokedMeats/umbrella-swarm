@@ -21,7 +21,7 @@ issue, all labeled `swarm:state`, on milestone **Continuous**, on the configured
 
 | Issue | One per | Template |
 | --- | --- | --- |
-| Swarm state | repo | all areas with status (Active / Next / Parked / Retired) and rank, caps, lease table, merge tiers (below) |
+| Swarm state | repo | all areas with status (Active / Next / Parked / Retired) and rank, caps, lease table. A recorded merge tier does not gate who merges. |
 | Area brief | Active or paused area | [coordinator-brief.md](templates/coordinator-brief.md) |
 | Findings buffer | area | [findings-buffer.md](templates/findings-buffer.md) |
 
@@ -81,7 +81,7 @@ HOUSES        slugs + house goal lines (done-check, Why) from GitHub / areas.yml
 CAPS          coding_subagents_per_area, coding_subagents_total, cycle,
               sibling_sessions_allowed (areas.yml); limits.* (project.yml, v1: memory check, heavy gate)
 RUNTIME       cursor-cloud | claude-code (worker shapes per **Workers by runtime**)
-MERGE_TIER    0 | 1 | 2   (from the swarm state issue)
+MERGE_TIER    0 | 1 | 2   (recorded on the swarm state issue; does not gate who merges)
 LEASES        held by this area; hot_files list from areas.yml
 SKILL_PATH    skills/area-coordinator/SKILL.md (umbrella-swarm)
 V1_SKILLS     by name from umbrella-skills: /wayfinder /to-spec /to-tickets /implement
@@ -91,8 +91,8 @@ COMPANIONS    v1 umbrella/DELEGATION.md, umbrella/BUILD-STANDING.md, umbrella/CO
               umbrella/PRE-GRILL.md, umbrella/PROJECTS.md, umbrella/DEVICE-QA.md,
               umbrella/PROJECT-CONFIG.md; umbrella-swarm skills/verify-own-work/SKILL.md,
               skills/recall/SKILL.md, skills/swarmy/SKILL-MAP.md
-FORBIDDEN     umbrella/SKILL.md; running a grill with the founder; merge outside MERGE_TIER;
-              master/Preview/OTA/migrate; editing another area's leased file; triage labels;
+FORBIDDEN     umbrella/SKILL.md; running a grill with the founder; Preview/master promote, OTA, migrations, data deletion, Railway, workflow files, spend;
+              editing another area's leased file; triage labels;
               a coding spawn that fails **Codable ticket** (handoff lane, Done, closed,
               unreadable status, or work already on <dev-branch>)
 CODING_GATE   before any coding spawn: area-coordinator **Codable ticket**
@@ -207,8 +207,8 @@ Why: Start must not burn a near-empty budget; in-flight work should drain to zer
 
 One line per Active area: goal · open live tickets · in flight · Ready to merge ·
 waiting on the founder. One line for the Next list (rank order, ready-for-agent counts).
-Then a single list of what needs the founder: grills, merge approvals, migrations,
-opt-ins, rotation or cap proposals. Nothing else.
+Then a single list of what needs the founder: grills, Preview/master promotes, OTA, migrations, data deletion,
+Railway, workflow files, spend, opt-ins, rotation or cap proposals. Nothing else.
 
 ## Rotate
 
@@ -299,17 +299,17 @@ The lease table is on the swarm state issue:
 
 ## Merge path
 
-Follow [verify-own-work](../verify-own-work/SKILL.md) **Scripted gate** (pending the product PR that teaches `commands.pr_ready` to print `risk:`). The receipt lists every area rung as PASS or N/A with a reason, and the script's pass line names the head you merge. Do not restate risk paths here.
+Follow umbrella-skills CONVENTIONS.md **Land gate**, and [verify-own-work](../verify-own-work/SKILL.md) **Scripted gate**. The receipt lists every area rung as PASS or N/A with a reason. Step 1 may WAIT; the script's final PASS names the head you merge, after TL (when required) and BV `GATE:` comments on the same SHA. Do not restate risk paths here.
 
-Land one PR at a time from the bottom (stack base first, else oldest Ready). After `<dev-branch>` moves, run `commands.pr_ready` on the new head before that merge.
+Land one PR at a time from the bottom (stack base first, else oldest Ready). After `<dev-branch>` moves, rerun the stale gates on the new head before that merge.
 
-**Tier 0** waits for the founder before that merge. **Tier 1/2** merge when the scripted gate is met and the PR fits that tier on the swarm state issue.
+After Tech Lead (when required), Build Verifier, the final pr-ready PASS on the same SHA, and the pre-merge check, the author session may merge its own PR.
 
-Dispatch's only merge job is land order and hot-file conflicts. It pings the owner who is next, and it blocks a merge that shares a leased or hot path with another Ready PR. It does not re-run the ladder. After merge, the coordinator sets the lane from what is left (`/implement` **End of house**, `/swarmy-mode` **Standing rules this mode keeps**). Merge never marks Done. Phone-visible leftover stays on Desk device. Field is only outdoor, GPS, or on-wrist proof.
+When the fleet is on, Dispatch still orders land and names hot-file conflicts. It pings the owner who is next, and it blocks a merge that shares a leased or hot path with another Ready PR. It does not replace the author's pre-merge check, and it does not re-run the ladder. After merge, the coordinator sets the lane from what is left (`/implement` **End of house**, `/swarmy-mode` **Standing rules this mode keeps**). Merge never marks Done. Phone-visible leftover stays on Desk device. Field is only outdoor, GPS, or on-wrist proof.
 
-**Never self-merge,** at any tier: DB migrations, master/Preview promotes, OTA, auth, Stripe or payments code, shared contracts, data deletion, a failed or missing rung.
+Still waiting on Jacob: Preview/master promotes, OTA, migrations, data deletion, Railway, workflow files, and anything that spends money.
 
-A revert of a self-merged PR drops that area one tier and goes through `/correct`.
+A revert of an author-merged PR goes through `/correct`.
 
 ## Grills
 
