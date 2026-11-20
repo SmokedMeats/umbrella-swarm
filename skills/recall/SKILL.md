@@ -26,7 +26,7 @@ Stop as soon as you can fill the resume note.
 
 1. **Area brief issue** body (or `paths.umbrella_cursor` for a classic `/umbrella` house in a Next or Parked area).
 2. Its **last 5 cycle comments**.
-3. **Swarm state issue:** your status (active/paused), merge tier, leases.
+3. **Swarm state issue:** your status (active/paused), leases. A recorded merge tier does not gate who merges.
 4. **GitHub truth:** open PRs and tickets with `area:<slug>`; Ready to merge cards;
    `git log origin/<dev-branch>` since the brief's last cycle (who merged what, and
    did it touch your files).
