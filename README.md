@@ -137,6 +137,10 @@ The umbrella-skills README, **Project config**, explains the private config layo
 
 [skills/swarmy/SKILL-MAP.md](skills/swarmy/SKILL-MAP.md): every skill the swarm uses (this pack, umbrella-skills, Matt's pack, SimpleEnglish), who runs it, and when. It ships inside the `swarmy` skill so installed agents can read it.
 
+## The land gate
+
+One merge path for every runtime, whether a reviewer fleet is on or a solo session runs the same skills itself. See [docs/land-gate.md](docs/land-gate.md).
+
 ## Before pushing
 
 Every push runs a local `check:public-safe` gate (no CI) so private content cannot reach the public snapshot. It runs [gitleaks](https://github.com/gitleaks/gitleaks) over the commits being pushed, then checks every added line, new file path, and commit message against a private denylist.
