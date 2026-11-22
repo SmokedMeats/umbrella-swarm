@@ -61,7 +61,7 @@ Order is the plan: the house in focus first. Tickets that share files run one af
 
 ## Waiting on the founder
 
-- <grill / Preview/master promote / OTA / migration / data deletion / Railway / workflow / spend / opt-in>, in end-user words
+- <grill / held-branch promote / OTA / migration / data deletion / deploy config / workflow / spend / opt-in>, in end-user words
 
 ## Decisions
 

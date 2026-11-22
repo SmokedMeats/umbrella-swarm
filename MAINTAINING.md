@@ -21,7 +21,7 @@ This pack is a layer on umbrella-skills (v1). It calls v1 skills by name and cop
 
 ## Syncing product repos
 
-Sync is umbrella-skills' `scripts/sync-workspace.mjs`; this pack has no sync script. Pack pull requests land here as they are ready. The product-repo sync, into the repos listed in `project.yml` `workspace.skill_targets`, runs once per promote, right before it, never mid-day, and never while a pack PR is queued. The designated sync owner is the only agent that runs that sync, so the product branches never get two parallel syncs.
+Sync is umbrella-skills' `scripts/sync-workspace.mjs` (installers run it through umbrella-skills' `scripts/install.mjs`); this pack has no sync script. Pack pull requests land here as they are ready. The product-repo sync, into the repos listed in `project.yml` `workspace.skill_targets`, runs once per promote, right before it, never mid-day, and never while a pack PR is queued. The designated sync owner is the only agent that runs that sync, so the product branches never get two parallel syncs.
 
 Everything an installed agent must read lives under `skills/` (sync copies only `skills/*`): the skill map is `skills/swarmy/SKILL-MAP.md`, the templates are `skills/swarmy/templates/`. Link to them from skills with relative paths; never from a skill to `README.md` or `docs/`.
 
@@ -29,4 +29,32 @@ When one issue changes both packs (an umbrella-skills issue with a swarm compani
 
 ## Before pushing
 
-See README **Before pushing** (`check:public-safe`, and `node scripts/check-pr-ready.mjs` for the PR line).
+Every push runs a local `check:public-safe` gate (no CI) so private content cannot reach the public snapshot. It runs [gitleaks](https://github.com/gitleaks/gitleaks) over the commits being pushed, then checks every added line, new file path, and commit message against a private denylist.
+
+One-time setup per clone (`sync-workspace.mjs` does this for sibling clones when the private overlay is present):
+
+```bash
+git config core.hooksPath .githooks
+# gitleaks: brew install gitleaks | winget install gitleaks | scoop install gitleaks | release binary on Linux
+# Denylist lookup: $PUBLIC_SAFE_DENYLIST, `git config publicsafe.denylist`,
+# or a sibling clone with public-safe/denylist.txt. No denylist = push blocked.
+```
+
+Run it by hand (Node 18+; bash, Git Bash, or PowerShell):
+
+```bash
+node scripts/check-public-safe.mjs              # origin default branch..HEAD
+node scripts/check-public-safe.mjs --base <ref> # <ref>..HEAD, e.g. a stacked PR
+node scripts/check-public-safe.mjs --tree       # whole tracked tree at HEAD (audit)
+```
+
+A clean run prints one line, e.g. `check:public-safe PASS <repo>@<sha> (gitleaks 0, denylist 0)`.
+
+For a pull request, including a docs-only one, run:
+
+```bash
+node scripts/check-pr-ready.mjs
+```
+
+Paste the last line in the PR body: `pr-ready: PASS <head sha>`. The older docs-only stand-in — an independent exact-head Build Verifier pass plus a `## Evidence` block — is retired.
+

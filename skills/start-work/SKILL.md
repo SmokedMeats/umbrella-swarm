@@ -1,5 +1,5 @@
 ---
-name: Start work
+name: start-work
 description: >-
   Use when starting product coding work: pick what to run next (grill-done
   implement first; if only grill left, open grill with the founder). When
@@ -27,7 +27,7 @@ Owned by **Chief of Staff** (or whoever parents Start). Quiet on noop after a su
 2. **Pick the work** (skip if the founder already named ticket(s) or an area).
    - Prefer **Active** areas from swarm:state / `areas.yml` (within `caps.active_coordinators`).
    - **Grill-done first.** Prefer tickets whose house/map already has a **locked grill** (gaps closed) and has advanced past grill — i.e. ready for `/to-spec` → `/to-tickets` → `/implement`, or already has implement tickets that pass the **Coding-spawn gate** below. Live status comes from `project.yml` `status_options`. On the example board the coding frontier is **Unclaimed** or **In Progress**. Do **not** Start coding on open live `wayfinder:grilling` / unlocked-grill work while any grill-done ticket that passes that gate exists in Active areas.
-   - Among grill-done candidates: not mid-build, not held by another path, not area-roster Parked / `wait:seasons-cadence` unless the founder asked to resume parked, and never `needs:founder` or `needs:spend-approval` (ticket adds or turns on a paid service; Jacob approves first, standing 2026-10-22).
+   - Among grill-done candidates: not mid-build, not held by another path, not area-roster Parked / `wait:seasons-cadence` unless the founder asked to resume parked, and never `needs:founder` or `needs:spend-approval` (ticket adds or turns on a paid service; the founder approves first).
    - **Coding-spawn gate:** [area-coordinator](../area-coordinator/SKILL.md) **Codable ticket**. Do not restate it.
    - Break ties with area **Why it matters**, then Next-list rank on swarm:state, then oldest Ready.
    - Cap to one sensible burst (one house or a few non-overlapping tickets) so you do not dual-start exclusives.
@@ -69,7 +69,7 @@ Whoever creates a product ticket adds this checklist at creation. The board does
 - Build Verifier — only when the script prints `risk: high` or has no `risk:` field
 - `commands.pr_ready` final PASS on the same SHA
 - GitGuardian green
-- Pre-merge check — every verdict is on the current SHA; no `do not merge` / `MERGE HOLD`; no freeze; not Preview/master; no migration, data deletion, Railway, or workflow change
+- Pre-merge check — every verdict is on the current SHA; no `do not merge` / `MERGE HOLD`; no freeze; not a held branch (`branches.held`); no migration, data deletion, deploy-config, or workflow change
 - Squash-merge + record SHA
 - Preview migrate (if schema changed) — founder
 - Lane / Project Status
