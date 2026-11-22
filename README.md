@@ -38,6 +38,7 @@ Already have umbrella-skills? Clone this repo next to it (`git clone https://git
 | [skills/swarmy/templates/](skills/swarmy/templates/) | Coordinator brief, findings buffer, receipt, and goal-line templates. |
 | [skills/swarmy/SKILL-MAP.md](skills/swarmy/SKILL-MAP.md) | Every skill the swarm uses, who runs it, and when. |
 | [docs/PLAN.md](docs/PLAN.md) | What a swarm plan must cover: cap, areas, goals, handoffs, verification, collisions, rotation. |
+| [docs/land-gate.md](docs/land-gate.md) | How a worker's PR gets reviewed and merged in the swarm. |
 | [areas.example.yml](areas.example.yml) | Example area map. |
 | [project.example.yml](project.example.yml) | Project settings; the same file as umbrella-skills'. |
 
