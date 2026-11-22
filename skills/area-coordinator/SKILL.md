@@ -170,6 +170,8 @@ Do not clear usage park yourself; the parent clears it on probe recovery.
 **Pre-spawn:** re-check **Codable ticket** + **Coding-spawn gate** on the live Project Status and GitHub evidence. Fail closed on unclear Status; skip shipped/handoff/duplicate. Then one worker per ticket. Ship mode PR is forced for every worker: one ticket, one
 branch, one PR into `<dev-branch>`.
 
+**No own-computer work (fleet rule, founder 2026-11-21).** Do not let bots use their own computer (founder 11:43 AM CT 2026-11-21: "do not let bots use their own computer. it takes too much space. cloud agents for most things"). Only minimal things on a bot's computer, and only if necessary (founder 11:44 AM CT 2026-11-21: "only minimal things on computer. and only if necessary."). No cloning, building, testing or installing on the founder's laptop (founder 2026-11-21 10:39 AM CT: "what is making my computer slow? nothing better be running on it"). Device QA and the founder's own sessions there stay allowed. Build Verifier runs all legs on the local runner first (founder 12:42 PM CT 2026-11-21). Cloud is the fallback when the local runner is unreachable or refuses, and for the Android bundle export. BV legs are the local runner's only clone, build, test or install work. Existing local-runner ops jobs and Desk Device QA stay allowed.
+
 **Pick the worker's shape by runtime** (`/swarmy` **Workers by runtime**):
 
 - Cursor cloud → a cloud agent. The caps are the only limit.
@@ -186,9 +188,10 @@ branch, one PR into `<dev-branch>`.
   fails.
 
 **Launch your own workers.** You spawn your own workers (cloud agents included)
-without asking the parent first, inside the caps above, on cloud only while the
-remaining included Cursor usage is at or above `caps.cloud_usage_floor` (below it:
-`build`, or park per **Park for usage**). Same gates for every worker.
+without asking the parent first, inside the caps above, on cloud only while
+remaining included Cursor usage is at or above `caps.cloud_usage_floor`. When
+remaining included Cursor usage is below `caps.cloud_usage_floor`, park per
+**Park for usage** (founder 12:54 PM CT 2026-11-21: "Below the floor, Starts wait for cloud usage. No local builds."). Same gates for every worker.
 
 **Model tier.** Every packet you send (worker, verifier, review, search) carries
 `MODEL_TIER` from umbrella `DELEGATION.md` **MODEL_TIER**. That role table is the list. Do not copy it here. A locked area (`standing-product-rules.md`) never goes below its role default. Unset mapping follows that section's inherit rule. Tiers do not change the worker caps. A high-risk Build Verifier is a different agent than the author (the same model is fine) ([verify-own-work](../verify-own-work/SKILL.md) **Scripted gate**).
