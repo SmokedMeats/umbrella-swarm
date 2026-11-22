@@ -2,14 +2,16 @@
 name: Start work
 description: >-
   Use when starting product coding work: pick what to run next (grill-done
-  implement first; if only grill left, open grill with the founder) and
-  auto-pick Cursor cloud vs local Grok Build from included usage — one Start, no
-  mode or ticket choice. Local mid-stops write OVERFLOW_LOCAL progress notes
-  matching cloud park shape.
+  implement first; if only grill left, open grill with the founder). When
+  remaining included Cursor usage is below `caps.cloud_usage_floor`, park
+  (usage_parked) and never route a new Start to a local machine. One Start,
+  no mode or ticket choice. OVERFLOW_LOCAL is a stop receipt only.
 ---
 # Start work
 
-Single Start router: pick **what** to run (when the founder did not name it) and **where** it runs from Cursor included usage.
+Single Start router: pick **what** to run (when the founder did not name it). A coding Start runs on Cursor cloud, or parks when remaining included Cursor usage is below `caps.cloud_usage_floor`.
+
+**Fleet rule (founder, 2026-11-21).** Do not let bots use their own computer (founder 11:43 AM CT 2026-11-21: "do not let bots use their own computer. it takes too much space. cloud agents for most things"). Only minimal things on a bot's computer, and only if necessary (founder 11:44 AM CT 2026-11-21: "only minimal things on computer. and only if necessary."). No cloning, building, testing or installing on the founder's laptop (founder 2026-11-21 10:39 AM CT: "what is making my computer slow? nothing better be running on it"). Device QA and the founder's own sessions there stay allowed.
 
 Owned by **Chief of Staff** (or whoever parents Start). Quiet on noop after a successful route.
 
@@ -31,28 +33,28 @@ Owned by **Chief of Staff** (or whoever parents Start). Quiet on noop after a su
    - Cap to one sensible burst (one house or a few non-overlapping tickets) so you do not dual-start exclusives.
    - **Only grill left:** if no grill-done / implement-ready work remains but open live grilling (or pre-grill) work does, **do not invent build tickets**. Parent runs `/grilling` (or `/grill-me` on wayfinder siblings) with the founder — that is the Start outcome. Report “grilling you next” + which house/ticket.
    - If nothing Ready and nothing to grill: say so in one line (and what is blocked); do not invent scope.
-3. **One owner.** If the chosen ticket already has `overflow:local` mid-build, or a live cloud agent / exclusive lease, do not dual-start. Status only; stop. (Grill sessions are founder-facing; they are not dual-started with a coding path on the same house.)
-4. **Probe Cursor included usage** the same way `/swarmy` Start gate does (remaining included % and a cloud-agent launch probe). **Skip the usage probe when the picked outcome is a grill session** (no cloud/local coding route yet).
+3. **One owner.** If the chosen ticket already has `overflow:local`, park it (`usage_parked`). The local build does not keep going. If it has a live cloud agent or an exclusive lease, do not dual-start. Status only; stop. (Grill sessions are founder-facing; they are not dual-started with a coding path on the same house.)
+4. **Probe Cursor included usage** the same way `/swarmy` Start gate does (remaining included % and a cloud-agent launch probe). **Skip the usage probe when the picked outcome is a grill session** (no cloud coding route yet).
 5. **Route** (coding picks only)
-   - **At or above `caps.cloud_usage_floor` (default 10%) and probe OK** → cloud path: `/swarmy` Start/Resume for Active areas (Cursor cloud agents). Clear any stale `overflow:local` on tickets you are about to Start only if they are not mid-local.
-   - **Under floor or probe fails** → local path: same tickets under `/umbrella` on the local machine (Grok Build). Mark each claimed ticket `overflow:local` (and note on swarm:state if Active). Tell the founder briefly: parked cloud / running local. Never enable on-demand billing yourself.
+   - **When remaining included Cursor usage is at or above `caps.cloud_usage_floor` (default 10%) and the probe is OK** → cloud path: `/swarmy` Start/Resume for Active areas (Cursor cloud agents). Clear `overflow:local` when this cloud Start reclaims the ticket.
+   - **When remaining included Cursor usage is below `caps.cloud_usage_floor`, or the probe fails** → park. Mark `usage_parked` (keeps the Active slot) the same way `/swarmy` **Park for usage** does. Do not route to a local Grok Build or any local machine. Do not mark `overflow:local` on a new Start. Tell the founder briefly: parked, floor. Never enable on-demand billing yourself. Founder 12:54 PM CT 2026-11-21: "Below the floor, Starts wait for cloud usage. No local builds."
 6. **In-flight rules**
    - Cloud already running may continue toward 0% until launches fail; on fail set `PARKED_CLOUD_USAGE` / `usage_parked` (keeps Active slot) with the swarm park brief (agent ids / PRs / tickets / leases / error).
-   - Mid-local finishes local — do not yank to cloud mid-build when usage recovers.
-7. **On usage recovery** (existing ~2h CoS probe): auto-resume swarm Starts for open tickets that are **not** mid-local only after each ticket passes the **Coding-spawn gate** again. Drop `overflow:local` only when reclaiming for cloud. Prefer cloud for **new** Starts once at or above floor.
-8. **Report** one short line: what was picked (ticket/area or grill session), path chosen (cloud|local|grill), and any still-parked or empty-queue items.
+   - An in-flight local run stops, writes the OVERFLOW_LOCAL stop receipt, and parks (`usage_parked`). Founder 12:54 PM CT 2026-11-21: "Below the floor, Starts wait for cloud usage. No local builds."
+7. **On usage recovery** (existing ~2h CoS probe): auto-resume swarm Starts for open tickets only after each ticket passes the **Coding-spawn gate** again. Clear `overflow:local` on that park or when reclaiming the ticket for cloud. New Starts go to cloud when remaining included Cursor usage is at or above `caps.cloud_usage_floor`.
+8. **Report** one short line: what was picked (ticket/area or grill session), path chosen (cloud|parked|grill), and any still-parked or empty-queue items.
 
-## Mid-stop progress notes (local = cloud shape)
+## Mid-stop progress notes
 
-Cold restarts read GitHub (`/recall`), so progress must live on issues — not chat — for **both** paths.
+Cold restarts read GitHub (`/recall`), so a usage park lives on issues, not chat.
 
 **Cloud** (already in `/swarmy`): on usage park, rewrite the area brief `PARKED_CLOUD_USAGE` · timestamp · in flight (agent ids / PRs / tickets) · next tickets · leases · last spawn · error; append findings-buffer comment; set `usage_parked` on swarm:state.
 
-**Local** (required whenever a local `/umbrella` / Grok Build run stops mid-ticket — crash, Window full, handoff, Stop, or Start router parks cloud and continues local):
+**OVERFLOW_LOCAL is a stop receipt only.** A new Start never begins a local run. An in-flight local run stops. A ticket left with `overflow:local` parks (`usage_parked`). The local build does not keep going.
 1. Keep assignee + Project Status **In Progress**. Do not move the card to Project **Parked** or a handoff lane from this note. Lane names and who may be coded stay [area-coordinator](../area-coordinator/SKILL.md) **Codable ticket**. On a fitted Pipeline, tick only a gate you ran.
-2. Comment on the ticket (and area brief / swarm:state if Active): `OVERFLOW_LOCAL` · timestamp · branch tip / WIP paths · open PR if any · AC / Build-loop remainder · blockers · next concrete step · machine name. The machine name is the configured runtime, not a hardcoded host.
-3. Label or note `overflow:local` so bare Start and the usage probe refuse dual-start and will not yank mid-local to cloud.
-4. Do not clear `overflow:local` until the local Build loop for that ticket is empty or the founder explicitly reclaims.
+2. Comment on the ticket (and area brief / swarm:state if Active): `OVERFLOW_LOCAL` · timestamp · branch tip / WIP paths · open PR if any · AC / Build-loop remainder · blockers · next concrete step · parked `usage_parked` · machine name. The machine name is the configured runtime, not a hardcoded host. This receipt records the stop.
+3. Clear `overflow:local` when the ticket parks (`usage_parked`) or when a cloud Start reclaims it.
+4. Do not wait for the local Build loop to empty before clearing `overflow:local`.
 
 ## Pipeline checklist at creation
 
@@ -85,11 +87,11 @@ Whoever creates a product ticket adds this checklist at creation. The board does
 ## Anti-jobs
 
 - Do not ask the founder to pick the next ticket/area for an ordinary bare Start.
-- Do not ask the founder to pick cloud vs local for ordinary Starts.
+- Do not route a new Start to a local Grok Build or any local machine when remaining included Cursor usage is below `caps.cloud_usage_floor`. Park (`usage_parked`).
 - Do not skip grill-done implement work to open a new grill while that Ready queue has items.
 - Do not invent product scope or implement tickets when only grill work remains; grill the founder instead.
-- Do not run the same exclusives on cloud and local at once.
-- Do not leave a mid-local stop with only chat memory — write the `OVERFLOW_LOCAL` receipt on GitHub.
+- Do not let a local build keep going. An in-flight local run stops, writes the `OVERFLOW_LOCAL` stop receipt, and parks (`usage_parked`).
+- Do not leave that stop with only chat memory — write the `OVERFLOW_LOCAL` receipt on GitHub.
 - Do not invent product scope; do not merge/OTA/migrate from this skill.
 - **MESSAGING:** keep messages succinct; DM the 1–2 target bots, never post to a group room.
 - Do not flip on-demand Cursor billing without an explicit founder yes.
