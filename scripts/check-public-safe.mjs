@@ -15,7 +15,12 @@
 //   node scripts/check-public-safe.mjs                 # origin default branch..HEAD
 //   node scripts/check-public-safe.mjs --base <ref>    # <ref>..HEAD (stacked PRs)
 //   node scripts/check-public-safe.mjs --range A..B    # explicit range
-//   node scripts/check-public-safe.mjs --tree          # gitleaks + denylist over every tracked file at HEAD
+//   node scripts/check-public-safe.mjs --tree          # denylist over every tracked file at HEAD (audit)
+//
+// gitleaks fails closed: a fatal error, a non-zero exit with no report, an
+// unreadable report, or a non-zero exit with no findings is not zero leaks.
+// An empty range prints PASS and names [no new commits]. An unresolvable
+// range fails closed.
 //   .githooks/pre-push calls it with --pre-push (reads refs on stdin)
 //
 // Works with Node >= 18 on Linux, macOS, and Windows (Git Bash or PowerShell).
@@ -135,8 +140,24 @@ function denyHits(where, text) {
 // ---------- range scanning ----------
 // revs: array of git rev args (e.g. ["A..B"] or [sha, "--not", "--remotes"])
 function commitsIn(revs) {
-  const out = git('rev-list', ...revs).trim();
+  const listed = run('git', ['rev-list', ...revs]);
+  if (listed.status !== 0) return null;
+  const out = (listed.stdout || '').trim();
   return out ? out.split('\n') : [];
+}
+
+const exportIgnoreCache = new Map();
+
+// export-ignore paths stay out of the public archive. A denylist hit that
+// exists only there is not exported content.
+function isExportIgnored(file) {
+  if (!file || file === '/dev/null') return false;
+  if (exportIgnoreCache.has(file)) return exportIgnoreCache.get(file);
+  const listed = run('git', ['check-attr', 'export-ignore', '--', file]);
+  const set = listed.status === 0
+    && listed.stdout.split('\n').some((line) => line.trim().endsWith(': export-ignore: set'));
+  exportIgnoreCache.set(file, set);
+  return set;
 }
 
 function scanDenylistRange(revs) {
@@ -158,14 +179,18 @@ function scanDenylistRange(revs) {
     }
     if (l.startsWith('+++ ')) {
       file = l.slice(4).replace(/^b\//, '');
-      if (file !== '/dev/null') hits.push(...denyHits(`${sha} path`, file));
+      if (file !== '/dev/null' && !isExportIgnored(file)) hits.push(...denyHits(`${sha} path`, file));
       continue;
     }
     if (l.startsWith('rename to ')) {
-      hits.push(...denyHits(`${sha} path`, l.slice(10)));
+      const renamed = l.slice(10);
+      if (!isExportIgnored(renamed)) hits.push(...denyHits(`${sha} path`, renamed));
       continue;
     }
-    if (l.startsWith('+') && !l.startsWith('+++')) hits.push(...denyHits(`${sha} ${file}`, l.slice(1)));
+    if (l.startsWith('+') && !l.startsWith('+++')) {
+      if (isExportIgnored(file)) continue;
+      hits.push(...denyHits(`${sha} ${file}`, l.slice(1)));
+    }
   }
   return hits;
 }
@@ -202,30 +227,37 @@ function gitleaks(logOpts) {
   }
   const dir = mkdtempSync(path.join(os.tmpdir(), 'public-safe-'));
   const report = path.join(dir, 'gitleaks.json');
-  // No log opts: scan the working tree (`dir`). A range scan stays on `git`.
   const gArgs = logOpts
     ? ['git', '.', '--no-banner', '--redact', '--exit-code', '1', '--report-format', 'json', '--report-path', report, `--log-opts=${logOpts}`]
     : ['dir', top, '--no-banner', '--redact', '--exit-code', '1', '--report-format', 'json', '--report-path', report];
-  // stderr: publish-public.sh captures stdout and matches the PASS line.
-  console.error(`gitleaks ${gArgs.join(' ')}`);
+  console.log(`gitleaks ${gArgs.join(' ')}`);
   const r = run('gitleaks', gArgs);
   let findings = null;
-  try {
-    const parsed = JSON.parse(readFileSync(report, 'utf8'));
-    if (Array.isArray(parsed)) findings = parsed;
-  } catch {
-    findings = null;
+  let reportError = '';
+  if (!existsSync(report)) {
+    reportError = 'gitleaks wrote no report';
+  } else {
+    try {
+      const parsed = JSON.parse(readFileSync(report, 'utf8'));
+      if (!Array.isArray(parsed)) reportError = 'gitleaks report is unreadable';
+      else findings = parsed;
+    } catch {
+      reportError = 'gitleaks report is unreadable';
+    }
   }
   rmSync(dir, { recursive: true, force: true });
-  const fatal = Boolean(r.error) || r.status === null || (r.status !== 0 && r.status !== 1);
-  if (fatal) {
-    die(`check:public-safe FAIL ${repo}: gitleaks error (fail closed)\n${r.stderr || r.stdout || r.error || ''}`);
+  const detail = (r && (r.stderr || r.stdout)) || '';
+  if (reportError) {
+    die(`check:public-safe FAIL ${repo}: gitleaks error (fail closed): ${reportError}\n${detail}`);
   }
-  if (findings === null) {
-    die(`check:public-safe FAIL ${repo}: gitleaks report unreadable (fail closed)\n${r.stderr || r.stdout || ''}`);
+  if (!r || r.error || r.status === null || r.status === undefined) {
+    die(`check:public-safe FAIL ${repo}: gitleaks error (fail closed)\n${detail}`);
   }
   if (r.status !== 0 && findings.length === 0) {
-    die(`check:public-safe FAIL ${repo}: gitleaks exited ${r.status} with no findings (fail closed)\n${r.stderr || r.stdout || ''}`);
+    die(`check:public-safe FAIL ${repo}: gitleaks error (fail closed): gitleaks exited non-zero with no findings\n${detail}`);
+  }
+  if (r.status !== 0 && r.status !== 1) {
+    die(`check:public-safe FAIL ${repo}: gitleaks error (fail closed)\n${detail}`);
   }
   return findings.map((f) => ({
     where: `${(f.Commit || '').slice(0, 7)} ${f.File}:${f.StartLine}`,
@@ -246,19 +278,13 @@ function report(label, tip, leaks, hits) {
   return false;
 }
 
-function checkRevs(revs, tip, label, { emptyRange = 'fail' } = {}) {
-  let commits;
-  try {
-    commits = commitsIn(revs);
-  } catch {
-    die(`check:public-safe FAIL ${repo}: range not resolved (fail closed): ${label}`);
+function checkRevs(revs, tip, label) {
+  const commits = commitsIn(revs);
+  if (commits === null) {
+    die(`check:public-safe FAIL ${repo}: unresolvable range ${label} (fail closed)`);
   }
   if (commits.length === 0) {
-    const short = tip ? tip.slice(0, 7) : 'HEAD';
-    if (emptyRange !== 'pass') {
-      die(`check:public-safe FAIL ${repo}@${short}: empty range ${label} (fail closed)`);
-    }
-    console.log(`check:public-safe PASS ${repo}@${short} (no new commits; gitleaks did not run)`);
+    console.log(`check:public-safe PASS ${repo}@${tip.slice(0, 7)} (gitleaks 0, denylist 0) [no new commits]`);
     return true;
   }
   const leaks = gitleaks(revs.join(' '));
@@ -285,7 +311,7 @@ if (flag('--pre-push')) {
     if (remoteSha && !ZERO.test(remoteSha) && run('git', ['cat-file', '-e', `${remoteSha}^{commit}`]).status === 0) {
       revs.push(remoteSha);
     }
-    ok = checkRevs(revs, localSha, localRef, { emptyRange: 'pass' }) && ok;
+    ok = checkRevs(revs, localSha, localRef) && ok;
   }
 } else if (flag('--tree')) {
   const tip = git('rev-parse', 'HEAD').trim();
@@ -295,15 +321,14 @@ if (flag('--pre-push')) {
   const range = opt('--range');
   const base = opt('--base') || defaultBase();
   if (range) {
-    const tipRev = range.split('..').pop() || 'HEAD';
-    let rangeTip;
-    try {
-      rangeTip = git('rev-parse', '--verify', `${tipRev}^{commit}`).trim();
-    } catch {
-      die(`check:public-safe FAIL ${repo}: range not resolved (fail closed): ${range}`);
+    const tipArg = range.split('..').pop() || 'HEAD';
+    const tipRev = run('git', ['rev-parse', '--verify', tipArg]);
+    if (tipRev.status !== 0 || !(tipRev.stdout || '').trim()) {
+      die(`check:public-safe FAIL ${repo}: unresolvable range ${range} (fail closed)`);
     }
-    ok = checkRevs([range], rangeTip, range);
-  } else if (base) ok = checkRevs([`${base}..HEAD`], tip, `${base}..HEAD`, { emptyRange: 'pass' });
-  else ok = checkRevs(['HEAD'], tip, '(all history)', { emptyRange: 'pass' });
+    ok = checkRevs([range], tipRev.stdout.trim(), range);
+  }
+  else if (base) ok = checkRevs([`${base}..HEAD`], tip, `${base}..HEAD`);
+  else ok = checkRevs(['HEAD'], tip, '(all history)');
 }
 process.exit(ok ? 0 : 1);

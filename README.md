@@ -58,7 +58,7 @@ cd umbrella-skills
 node scripts/sync-workspace.mjs
 ```
 
-When a sibling `umbrella-swarm` folder exists, `sync-workspace.mjs` copies its `skills/*` into the same skill roots as umbrella-skills: `~/.grok`, `~/.cursor`, `~/.claude`, `~/.agents`, `~/.copilot` (VS Code reads the last three), each product repo's `workspace.skill_targets` folders, and `--box` / `--dest` roots. Commit those product-repo folders so cloud agents see them, and re-run sync after a pack changes; never edit the installed copies. Use `--no-swarm` to skip the swarm pack. Details: the umbrella-skills README, **Install**.
+When a sibling `umbrella-swarm` folder exists, `sync-workspace.mjs` copies its `skills/*` into the same skill roots as umbrella-skills: `~/.grok`, `~/.cursor`, `~/.claude`, `~/.agents`, `~/.copilot` (VS Code reads the last three), each product repo's `workspace.skill_targets` folders, and `--box` / `--dest` roots. Commit those product-repo folders so cloud agents see them; never edit the installed copies. Re-run sync into your IDE roots after a pack changes. The product-repo sync runs once per promote, right before it, never mid-day, and never while a pack PR is queued. Pack pull requests still land in the pack repos as they are ready. The designated sync owner is the only agent that runs that sync, so the product branches never get two parallel syncs. Use `--no-swarm` to skip the swarm pack. Details: the umbrella-skills README, **Install**.
 
 Then say `/swarmy-mode` (or "start the swarm") in your agent.
 
@@ -136,10 +136,6 @@ The umbrella-skills README, **Project config**, explains the private config layo
 ## Skill map
 
 [skills/swarmy/SKILL-MAP.md](skills/swarmy/SKILL-MAP.md): every skill the swarm uses (this pack, umbrella-skills, Matt's pack, SimpleEnglish), who runs it, and when. It ships inside the `swarmy` skill so installed agents can read it.
-
-## The land gate
-
-One merge path for every runtime, whether a reviewer fleet is on or a solo session runs the same skills itself. See [docs/land-gate.md](docs/land-gate.md).
 
 ## Before pushing
 
