@@ -91,7 +91,7 @@ COMPANIONS    v1 umbrella/DELEGATION.md, umbrella/BUILD-STANDING.md, umbrella/CO
               umbrella/PRE-GRILL.md, umbrella/PROJECTS.md, umbrella/DEVICE-QA.md,
               umbrella/PROJECT-CONFIG.md; umbrella-swarm skills/verify-own-work/SKILL.md,
               skills/recall/SKILL.md, skills/swarmy/SKILL-MAP.md
-FORBIDDEN     umbrella/SKILL.md; running a grill with the founder; Preview/master promote, OTA, migrations, data deletion, Railway, workflow files, spend;
+FORBIDDEN     umbrella/SKILL.md; running a grill with the founder; promotes to held branches (`branches.held`), OTA app updates, migrations, data deletion, deploy config, workflow files, spend;
               editing another area's leased file; triage labels;
               a coding spawn that fails **Codable ticket** (handoff lane, Done, closed,
               unreadable status, or work already on <dev-branch>)
@@ -207,8 +207,8 @@ Why: Start must not burn a near-empty budget; in-flight work should drain to zer
 
 One line per Active area: goal · open live tickets · in flight · Ready to merge ·
 waiting on the founder. One line for the Next list (rank order, ready-for-agent counts).
-Then a single list of what needs the founder: grills, Preview/master promotes, OTA, migrations, data deletion,
-Railway, workflow files, spend, opt-ins, rotation or cap proposals. Nothing else.
+Then a single list of what needs the founder: grills, promotes to held branches (`branches.held`), OTA app updates, migrations, data deletion,
+deploy config, workflow files, spend, opt-ins, rotation or cap proposals. Nothing else.
 
 ## Rotate
 
@@ -291,7 +291,7 @@ The lease table is on the swarm state issue:
 ```
 
 - Only the parent grants a lease. A coordinator asks in ESCALATE.
-- One migration lease for all of `backend/drizzle/**`. Granting it does not
+- One migration lease for all of the migrations folder (`paths.drizzle_glob`). Granting it does not
   approve the migration. The founder approves the migration itself.
 - A lease ends when its PR merges or closes.
 - Append-only docs (Device QA checklist, Effect Schema inventory, module-intent
@@ -307,7 +307,7 @@ After Tech Lead (when required), Build Verifier, the final pr-ready PASS on the 
 
 When the fleet is on, Dispatch still orders land and names hot-file conflicts. It pings the owner who is next, and it blocks a merge that shares a leased or hot path with another Ready PR. It does not replace the author's pre-merge check, and it does not re-run the ladder. After merge, the coordinator sets the lane from what is left (`/implement` **End of house**, `/swarmy-mode` **Standing rules this mode keeps**). Merge never marks Done. Phone-visible leftover stays on Desk device. Field is only outdoor, GPS, or on-wrist proof.
 
-Still waiting on Jacob: Preview/master promotes, OTA, migrations, data deletion, Railway, workflow files, and anything that spends money.
+Still waiting on the founder: promotes to held branches (`branches.held`), OTA app updates, migrations, data deletion, deploy config, workflow files, and anything that spends money.
 
 A revert of an author-merged PR goes through `/correct`.
 

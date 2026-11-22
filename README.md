@@ -1,81 +1,61 @@
 # umbrella-swarm
 
-> **Status: draft.** "Draft" means the multi-agent swarm *workflow* is experimental: the skills can be read and installed, but the way of working they describe is still being tried out. It is not a finished replacement for solo `/umbrella`.
+> **Draft.** The skills install and run, but the multi-agent way of working they describe is still being tried out. It is not a replacement for solo `/umbrella`.
 
-## What it is
+Run **several AI agents on one product at once**, each owning one product goal, while one human reviews a sample of what lands.
 
-umbrella-swarm lets **several AI agents work on one product at the same time**, each on its own goal, while one human reviews their output on a schedule.
+It is an add-on to [umbrella-skills](https://github.com/SmokedMeats/umbrella-skills). With umbrella-skills alone, one agent runs `/umbrella` on one batch of issues (a house) at a time. With this pack, a lead agent (the **Chief of Staff**) starts a few **area coordinators**. Each coordinator owns one goal, runs the umbrella loop for it house by house, and hands coding to worker agents that attach a verification receipt to every change. The shape is borrowed from how [Lauren Tan (poteto)](https://github.com/poteto) runs many agents at once.
 
-It is an add-on to [umbrella-skills](https://github.com/SmokedMeats/umbrella-skills). With umbrella-skills alone, one agent runs `/umbrella` and works through one pack of issues at a time. With umbrella-swarm, a lead agent starts a few **area coordinators**. Each coordinator owns one product goal, runs the same umbrella loop for that goal, and hands coding to worker agents. Workers attach a **verification receipt** to each change, so agents can carry more of the merge path. The human checks a sample of the work after it lands.
+**Who it is for:** someone already using umbrella-skills who has more ready work than one agent session can carry, and enough cloud-agent capacity to run 4–6 coordinators.
 
-The multi-agent shape is borrowed from how [Lauren Tan (poteto)](https://github.com/poteto) runs many agents at once: coordinators ("chiefs of staff"), each owning a goal, keeping a task list, and spawning cloud agents to write the code.
+## Install
 
-## What it is not
+This pack installs with umbrella-skills. The umbrella-skills installer clones this repo next to it and installs both, plus the upstream packs they need:
 
-- **Not a replacement for `/umbrella`.** Solo `/umbrella` keeps working as before. Work outside the running areas still goes through `/umbrella`.
-- **Not standalone.** It calls umbrella-skills and Matt Pocock's skills by name and copies none of them. See [Depends on](#depends-on).
-- **Not tied to one product.** This repo ships no real area map, goals, or product rules. You keep those in your own private config. See [Project config](#project-config).
+```bash
+git clone https://github.com/SmokedMeats/umbrella-skills.git
+node umbrella-skills/scripts/install.mjs
+```
+
+Already have umbrella-skills? Clone this repo next to it (`git clone https://github.com/SmokedMeats/umbrella-swarm.git`) and run `node umbrella-skills/scripts/install.mjs` again.
+
+## First run
+
+1. Finish the umbrella-skills **First run** (`/setup-matt-pocock-skills`, labels, `docs/agents/project.yml`).
+2. Copy [`areas.example.yml`](areas.example.yml) to `docs/swarm/areas.yml` in your main repo (or the path `project.yml` names) and list your areas, each with a goal and a done-signal. Read [docs/PLAN.md](docs/PLAN.md) first: it says what an area plan must cover.
+3. Say **`/swarmy-mode`** (or "start the swarm") to your agent. Say **Start** for the next piece of work (`/start-work` picks it), or `/swarmy status`, `pause`, `resume`, `rotate`.
+
+## What's in it
+
+| Path | What |
+| --- | --- |
+| [skills/swarmy-mode](skills/swarmy-mode/SKILL.md) | Sticky front door, like `umbrella-mode`. The parent agent is the Chief of Staff. |
+| [skills/swarmy](skills/swarmy/SKILL.md) | The conductor: start, resume, pause, status, rotate, routing, file leases, merge path. |
+| [skills/start-work](skills/start-work/SKILL.md) | Picks what to run next on a bare "Start" (grill-done builds first, then grills). |
+| [skills/area-coordinator](skills/area-coordinator/SKILL.md) | What a coordinator does each cycle, house by house. |
+| [skills/verify-own-work](skills/verify-own-work/SKILL.md) | The verification ladder (rungs R0–R7) and the receipt a worker attaches. |
+| [skills/recall](skills/recall/SKILL.md) | Rebuilds context from GitHub and transcripts after a restart. |
+| [skills/swarmy/templates/](skills/swarmy/templates/) | Coordinator brief, findings buffer, receipt, and goal-line templates. |
+| [skills/swarmy/SKILL-MAP.md](skills/swarmy/SKILL-MAP.md) | Every skill the swarm uses, who runs it, and when. |
+| [docs/PLAN.md](docs/PLAN.md) | What a swarm plan must cover: cap, areas, goals, handoffs, verification, collisions, rotation. |
+| [docs/land-gate.md](docs/land-gate.md) | How a worker's PR gets reviewed and merged in the swarm. |
+| [areas.example.yml](areas.example.yml) | Example area map. |
+| [project.example.yml](project.example.yml) | Project settings; the same file as umbrella-skills'. |
+
+It needs [umbrella-skills](https://github.com/SmokedMeats/umbrella-skills), [Matt Pocock's skills](https://github.com/mattpocock/skills) and [SimpleEnglish](https://github.com/AminBlg/SimpleEnglish); the installer above puts all of them in place. These skills call those by name and copy none of their rules, so the swarm follows when umbrella-skills changes. `/swarmy` **Start** stops and names any pack that is missing.
 
 ## Words used here
 
 | Word | Meaning |
 | --- | --- |
-| **Founder** | The human who owns the product. Makes the irreversible calls (Preview/master promotes, OTA, migrations, data deletion, Railway, workflow files, and spend). The author session merges a `<dev-branch>` PR after the land gate. |
+| **Founder** | The human who owns the product. Makes the irreversible calls (promotes to held branches, OTA app updates, migrations, data deletion, deploy config, workflow files, and spend). The author session merges a `<dev-branch>` PR after the land gate. |
 | **Area** | One product goal (for example "checkout works offline"). Every open milestone belongs to exactly one area. |
 | **House** | A named pack of related issues worked as a unit (the `umbrella:…` label from umbrella-skills). Smaller than a milestone. |
 | **Area coordinator** | An agent that runs the umbrella loop for one area, house by house. |
 | **Chief of Staff** | The lead agent. Talks to the founder, starts and stops coordinators. |
 | **Receipt** | A short record of what a worker checked before asking to merge. |
 
-## Depends on
-
-Install in this order. Later packs call earlier ones by name.
-
-| # | Pack | Why it is needed |
-| --- | --- | --- |
-| 1 | [mattpocock/skills](https://github.com/mattpocock/skills) (v1.3.1) | The base skills that do the work: `/grill-me`, `/to-spec`, `/to-tickets`, `/implement`, `/tdd`, … |
-| 1b | [AminBlg/SimpleEnglish](https://github.com/AminBlg/SimpleEnglish) | `/simple-english` for status, ship notes and grill leftovers |
-| 2 | [SmokedMeats/umbrella-skills](https://github.com/SmokedMeats/umbrella-skills) | `/umbrella`, `/triage`, `/code-review`, the verifiers, and the house rules this pack drives |
-| 3 | [SmokedMeats/umbrella-swarm](https://github.com/SmokedMeats/umbrella-swarm) (this repo) | Swarm mode on top of the two above |
-
-`/swarmy` **Start** checks that packs 1, 1b and 2 are installed, the same way `/umbrella` does. If one is missing, it stops and tells you what to install.
-
-Why by name, not copied: this pack's skills say "run `/implement`", they don't restate `/implement`'s rules, so there is one copy of each rule and the swarm follows when umbrella-skills changes. That is about the *text of the rules*. Real files still get copied on install: the sync script writes each pack into every agent's skills folder and into your product repos, and the private umbrella-skills clone keeps pinned backups of Matt's pack, SimpleEnglish, and pstack in `vendor/` so an outside repo going away never breaks an install (umbrella-skills README **Where skills live**).
-
-## Install
-
-The simplest path is to clone this repo **next to** your umbrella-skills clone and run umbrella-skills' sync script. It installs both packs. From the private umbrella-skills clone it also installs the pinned Matt pack and SimpleEnglish from `vendor/`, so step 1 is only for public clones.
-
-```bash
-# 1. Matt's pack + SimpleEnglish (public clones only), then run /setup-matt-pocock-skills in each repo
-npx skills@latest add mattpocock/skills
-npx skills@latest add https://github.com/AminBlg/SimpleEnglish --skill simple-english
-
-# 2 + 3. umbrella-skills and umbrella-swarm as sibling folders
-git clone https://github.com/SmokedMeats/umbrella-skills.git
-git clone https://github.com/SmokedMeats/umbrella-swarm.git
-cd umbrella-skills
-node scripts/sync-workspace.mjs
-```
-
-When a sibling `umbrella-swarm` folder exists, `sync-workspace.mjs` copies its `skills/*` into the same skill roots as umbrella-skills: `~/.grok`, `~/.cursor`, `~/.claude`, `~/.agents`, `~/.copilot` (VS Code reads the last three), each product repo's `workspace.skill_targets` folders, and `--box` / `--dest` roots. Commit those product-repo folders so cloud agents see them; never edit the installed copies. Re-run sync into your IDE roots after a pack changes. The product-repo sync runs once per promote, right before it, never mid-day, and never while a pack PR is queued. Pack pull requests still land in the pack repos as they are ready. The designated sync owner is the only agent that runs that sync, so the product branches never get two parallel syncs. Use `--no-swarm` to skip the swarm pack. Details: the umbrella-skills README, **Install**.
-
-Then say `/swarmy-mode` (or "start the swarm") in your agent.
-
-## What's in it
-
-| Path | What |
-| --- | --- |
-| [docs/PLAN.md](docs/PLAN.md) | What a swarm plan must cover: cap, areas, goals, handoffs, verification, collisions, rotation. Read this first. |
-| [skills/swarmy-mode](skills/swarmy-mode/SKILL.md) | Sticky front door, like `umbrella-mode`. The Chief of Staff is the parent agent. |
-| [skills/swarmy](skills/swarmy/SKILL.md) | The conductor: start, resume, pause, status, rotate, routing, file leases, merge path. |
-| [skills/area-coordinator](skills/area-coordinator/SKILL.md) | What a coordinator does each cycle, house by house. |
-| [skills/verify-own-work](skills/verify-own-work/SKILL.md) | The verification ladder (rungs R0–R7) and the receipt. |
-| [skills/recall](skills/recall/SKILL.md) | Rebuilds context from GitHub and transcripts after a restart. |
-| [skills/swarmy/templates/](skills/swarmy/templates/) | Coordinator brief, findings buffer, receipt, and goal-line templates. |
-| [areas.example.yml](areas.example.yml) | Example area map. Copy to `areas.yml` in your private config. |
-| [project.example.yml](project.example.yml) | Project settings (repo, branches, boards, `limits`). The same file as umbrella-skills'; change it there first. |
-| [MAINTAINING.md](MAINTAINING.md) | For maintainers: private vs public snapshot, `scripts/publish-public.sh`, and the one-copy rule with umbrella-skills. |
+Shared words (house, lane, Ship mode, land gate, ...) are in the umbrella-skills [glossary](https://github.com/SmokedMeats/umbrella-skills/blob/main/docs/GLOSSARY.md).
 
 ## Only a few areas run at once
 
@@ -108,7 +88,7 @@ Work is split into four layers. Each one names its goal, its why, and how you kn
 
 Why four layers: a milestone is too big to steer by every cycle. A house check can be answered every cycle.
 
-Sub-issues split a ticket; they are not goals. **Nothing is created without its goal line.** The Board role refuses a milestone, house, or ticket that lacks one at triage. Templates: [milestone](templates/milestone-goal.md), [house](templates/house-goal.md), [ticket](templates/ticket-goal.md).
+Sub-issues split a ticket; they are not goals. **Nothing is created without its goal line.** The Board role refuses a milestone, house, or ticket that lacks one at triage. Templates: [milestone](skills/swarmy/templates/milestone-goal.md), [house](skills/swarmy/templates/house-goal.md), [ticket](skills/swarmy/templates/ticket-goal.md).
 
 ## Roles
 
@@ -118,7 +98,7 @@ Sub-issues split a ticket; they are not goals. **Nothing is created without its 
 | **Area coordinator** | Runs one Active area's umbrella loop through subagents. |
 | **Board** | Triage and intake. Enforces goal lines. |
 | **Dispatch** | Land order and hot-file conflicts. The merge gate is the product `check:pr-ready` script. |
-| **Founder** (human) | Preview/master promotes, OTA, migrations, data deletion, Railway, workflow files, and spend. The author session merges a `<dev-branch>` PR after the land gate. |
+| **Founder** (human) | Promotes to held branches, OTA app updates, migrations, data deletion, deploy config, workflow files, and spend. The author session merges a `<dev-branch>` PR after the land gate. |
 
 The names are generic on purpose. Bind the founder's display name and board ids in `project.yml`.
 
@@ -129,48 +109,15 @@ This repo ships **no product area map and no product goals**. Keep those private
 1. Copy [`project.example.yml`](project.example.yml) to `project.yml` (or share one private config repo with umbrella-skills).
 2. Copy [`areas.example.yml`](areas.example.yml) to `areas.yml` in that private config.
 3. Keep goal docs (house goals, milestone goals, ticket goal log, product plan) there too.
-4. After `sync-workspace.mjs` runs with the private config present, skills find `areas.yml` at `docs/swarm/` in the primary repo, or at the path set in `project.yml`.
+4. After the installer (or `sync-workspace.mjs`) runs with the private config present, skills find `areas.yml` at `docs/swarm/` in the primary repo, or at the path set in `project.yml`.
 
 The umbrella-skills README, **Project config**, explains the private config layout.
-
-## Skill map
-
-[skills/swarmy/SKILL-MAP.md](skills/swarmy/SKILL-MAP.md): every skill the swarm uses (this pack, umbrella-skills, Matt's pack, SimpleEnglish), who runs it, and when. It ships inside the `swarmy` skill so installed agents can read it.
-
-## Before pushing
-
-Every push runs a local `check:public-safe` gate (no CI) so private content cannot reach the public snapshot. It runs [gitleaks](https://github.com/gitleaks/gitleaks) over the commits being pushed, then checks every added line, new file path, and commit message against a private denylist.
-
-One-time setup per clone (`sync-workspace.mjs` does this for sibling clones):
-
-```bash
-git config core.hooksPath .githooks
-# gitleaks: brew install gitleaks | winget install gitleaks | scoop install gitleaks | release binary on Linux
-# Denylist lookup: $PUBLIC_SAFE_DENYLIST, `git config publicsafe.denylist`,
-# or a sibling clone with public-safe/denylist.txt. No denylist = push blocked.
-```
-
-Run it by hand (Node 18+; bash, Git Bash, or PowerShell):
-
-```bash
-node scripts/check-public-safe.mjs              # origin default branch..HEAD
-node scripts/check-public-safe.mjs --base <ref> # <ref>..HEAD, e.g. a stacked PR
-node scripts/check-public-safe.mjs --tree       # whole tracked tree at HEAD (audit)
-```
-
-A clean run prints one line, e.g. `check:public-safe PASS <repo>@<sha> (gitleaks 0, denylist 0)`.
-
-For a pull request, including a docs-only one, run:
-
-```bash
-node scripts/check-pr-ready.mjs
-```
-
-Paste the last line in the PR body: `pr-ready: PASS <head sha>`. The older docs-only stand-in — an independent exact-head Build Verifier pass plus a `## Evidence` block — is retired.
 
 ## Sources
 
 - Matt Pocock × Lauren Tan livestream, "shipping 1,000's of PRs a month", 2026-10-03 (`MN9dGgmLyso`).
+
+Maintainers: [MAINTAINING.md](MAINTAINING.md).
 
 ## License
 

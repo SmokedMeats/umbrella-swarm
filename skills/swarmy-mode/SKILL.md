@@ -43,10 +43,10 @@ It runs the [/swarmy](../swarmy/SKILL.md) recipe and keeps area coordinators goi
    [/area-coordinator](../area-coordinator/SKILL.md), never `umbrella/SKILL.md`.
 5. **State lives on GitHub.** Brief issues, the swarm state issue, and findings
    buffer issues. Never in chat memory. A cold restart runs [/recall](../recall/SKILL.md).
-6. **No irreversible step without the founder.** Preview/master promote, OTA, migrations, data deletion, Railway, workflow files, and anything that spends money. After the land gate (TL when required, BV, the final pr-ready PASS on the same SHA, and the pre-merge check), the author session may merge its own PR.
+6. **No irreversible step without the founder.** promotes to held branches (`branches.held`), OTA app updates, migrations, data deletion, deploy config, workflow files, and anything that spends money. After the land gate (TL when required, BV, the final pr-ready PASS on the same SHA, and the pre-merge check), the author session may merge its own PR.
 7. **No poteto install.** This pack borrows Lauren Tan's operating model. It does
    not install poteto-mode or pstack.
-   Allowed pstack skills (Jacob 2:47 AM CT 2026-11-05): verify-own-work and show-me-your-work (garden self-prove pilot), statechart (opt-in), tdd, blast-radius, no-comments (only the one batched backend cleanup PR), why. Still excluded: poteto-mode, poteto-agent, pstack itself, unslop (deslop owns cleanup), principle-* skills.
+   Allowed pstack skills: verify-own-work and show-me-your-work (garden self-prove pilot), statechart (opt-in), tdd, blast-radius, no-comments (only the one batched backend cleanup PR), why. Still excluded: poteto-mode, poteto-agent, pstack itself, unslop (deslop owns cleanup), principle-* skills.
 8. **v1 skills by name, never copied.** See Prerequisites.
 9. **Nothing is created without its goal.** No area, milestone, house or ticket
    without goal + why + done-check (a ticket: `So that` + ACs). The founder approves new
@@ -156,7 +156,7 @@ coordinator or worker that cannot read installed skills (umbrella `DELEGATION.md
 - **Unclaimed** is filed and unassigned. A structure-only repair (native parent/sub-issues, blocked-by, milestone, Project membership, fitted Pipeline, or lane fit) leaves the card Unclaimed and unassigned. That repair is not a full `/triage`.
 - Triage stays on Board (`/triage`). Board enforces the milestone goal line, the house goal line, and the ticket `So that:` line before a coordinator builds the ticket.
 - Order real waits with native parent/sub-issues and GitHub blocked-by.
-- Status after the work is whatever is left (`/implement` **End of house**). **Desk device** is a phone-visible leftover only. **Field** is outdoor, GPS, or on-wrist proof only. Backend, SQL, CI, Railway, types, website-only, reports, pure math, research, dependencies, and runtime proof are not those lanes. Do not record them as one emulator, phone, or field box.
+- Status after the work is whatever is left (`/implement` **End of house**). **Desk device** is a phone-visible leftover only. **Field** is outdoor, GPS, or on-wrist proof only. Backend, SQL, CI, deploy config, types, website-only, reports, pure math, research, dependencies, and runtime proof are not those lanes. Do not record them as one emulator, phone, or field box.
 - When the configured board has a fitted Pipeline, the owner of each gate ticks only that gate, and only with evidence. Phone and field boxes stay unticked, with a one-line reason, unless that leftover is real.
 - Merge does not mark Done. Done needs the applicable proof or QA. Phone-visible issues stay open on Desk device for Device QA. Land one PR at a time from the bottom. Dispatch only for land order or a hot-file conflict (`/swarmy` **Merge path**).
 - Before a coding worker spawn, Project Status must be readable and coding-eligible (`/area-coordinator` **Codable ticket**). Desk device, Field, Operator, Live Beta, and GoLive are handoff lanes, not coding candidates. Done and closed are not coding candidates. A missing or conflicting status fails closed. Open and `ready-for-agent` is not enough. If `<dev-branch>` already has the implementation (merged PR and AC evidence, including a Refs issue still open), do not spawn another coder. A similar title is not proof. An existing PR or worker is not duplicated. A newly evidenced regression is new scope. This does not stop a high-risk Build Verifier or Device QA.
@@ -165,8 +165,8 @@ coordinator or worker that cannot read installed skills (umbrella `DELEGATION.md
 - Grills use Context / Choices / Recommend with end-user stories (`/grilling`), run by the parent with the founder.
 - Grill lock → `/to-spec` → `/to-tickets` keep `CARRY_FROM_GRILL` / `CARRY_FROM_SPEC`.
 - `/correct` (umbrella **Repeated corrections**) turns a repeat correction into lint rule > test > skill line.
-- Preview/master promotes, OTA, migrations, data deletion, Railway, workflow files, and spend only when the founder says so.
-- After the land gate (TL when required, BV, final pr-ready PASS on the same SHA, and the pre-merge check), the author session may merge its own PR. Preview/master promotes, OTA, migrations, data deletion, Railway, workflow files, and anything that spends money still wait for the founder.
+- promotes to held branches (`branches.held`), OTA app updates, migrations, data deletion, deploy config, workflow files, and spend only when the founder says so.
+- After the land gate (TL when required, BV, final pr-ready PASS on the same SHA, and the pre-merge check), the author session may merge its own PR. promotes to held branches (`branches.held`), OTA app updates, migrations, data deletion, deploy config, workflow files, and anything that spends money still wait for the founder.
 - **MESSAGING:** keep messages succinct; DM the 1–2 target bots (SendToAgent), never post to a group room.
 
 ## Return contract (coordinator → parent)

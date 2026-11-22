@@ -23,7 +23,7 @@ serves the why, not just the work that is easiest to finish.
 
 ## You carry the area end to end
 
-You carry a triaged ticket to Ready to merge through your own subagents. The merge gate is [verify-own-work](../verify-own-work/SKILL.md) **Scripted gate**. Board triages in. Dispatch steps in only for land order or a hot-file conflict. The founder keeps grills, migrations, data deletion, Preview/master promotes, OTA, Railway, workflow files, and anything that spends money.
+You carry a triaged ticket to Ready to merge through your own subagents. The merge gate is [verify-own-work](../verify-own-work/SKILL.md) **Scripted gate**. Board triages in. Dispatch steps in only for land order or a hot-file conflict. The founder keeps grills, migrations, data deletion, promotes to held branches (`branches.held`), OTA app updates, deploy config, workflow files, and anything that spends money.
 
 ## v1 skills you call by name (never copy)
 
@@ -130,7 +130,7 @@ Do not clear usage park yourself; the parent clears it on probe recovery.
 ### 3. Plan
 
 - **Frontier:** unblocked **Codable** tickets per `/implement` **Count first** and the **Coding-spawn gate**. **Handoff** lanes (Operator, Desk device, Field, Live Beta, GoLive) are not coding frontier. **Leftover** is only Operator, Desk device, Field — those unlock dependents via `blocked_by`; Live Beta / GoLive `blocked_by` still holds. Ready to merge waits on merge (holds dependents) and is not a new coding spawn.
-- **Never pull** `needs:founder` or `needs:spend-approval` (adds or turns on a paid service or cost; Jacob approves first, standing 2026-10-22). Skip it like `parked:*`; it stays in the queue until the label comes off. Don't remove or disable code tied to it unless the ticket says so.
+- **Never pull** `needs:founder` or `needs:spend-approval` (adds or turns on a paid service or cost; the founder approves first). Skip it like `parked:*`; it stays in the queue until the label comes off. Don't remove or disable code tied to it unless the ticket says so.
 - **No AC, no build.** A live ticket without `## Acceptance criteria` checkboxes, or
   without a `So that:` line pointing at its house goal (or milestone goal if
   unhoused), goes back to Board
@@ -288,7 +288,7 @@ Garden only, on the swarm state issue: before Ready, run [verify-own-work](../ve
 
 - Write product code yourself.
 - Run a grill with the founder. Prepare the gap list; the parent grills.
-- Preview/master promote, OTA, migrations, data deletion, Railway, workflow files, or anything that spends money, unless the founder approved that step. After the land gate (TL when required, BV, the final pr-ready PASS on the same SHA, and the pre-merge check), the author session may merge its own PR.
+- promotes to held branches (`branches.held`), OTA app updates, migrations, data deletion, deploy config, workflow files, or anything that spends money, unless the founder approved that step. After the land gate (TL when required, BV, the final pr-ready PASS on the same SHA, and the pre-merge check), the author session may merge its own PR.
 - Apply triage labels or milestones to new inbound issues (Board does).
 - Write `project.yml` `paths.umbrella_cursor`. Your state is the brief issue.
 - Create an area, milestone, house or ticket without goal + why + done-check
@@ -301,7 +301,7 @@ Garden only, on the swarm state issue: before Ready, run [verify-own-work](../ve
 
 ## Standing rules you keep
 
-[/swarmy-mode](../swarmy-mode/SKILL.md) **Standing rules this mode keeps**. Do not paste a second copy. Preview/master promotes, OTA, migrations, data deletion, Railway, workflow files, spend, and sampled real-phone QA stay as written there and in [verify-own-work](../verify-own-work/SKILL.md).
+[/swarmy-mode](../swarmy-mode/SKILL.md) **Standing rules this mode keeps**. Do not paste a second copy. promotes to held branches (`branches.held`), OTA app updates, migrations, data deletion, deploy config, workflow files, spend, and sampled real-phone QA stay as written there and in [verify-own-work](../verify-own-work/SKILL.md).
 
 ## Resync only when next
 
